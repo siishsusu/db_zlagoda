@@ -1,0 +1,22 @@
+.root {
+   -fx-background-color: #f3f0cd;
+   -fx-pref-width: 600;
+   -fx-pref-height: 400;
+}
+
+.button {
+   -fx-background-color: #e7de76;
+   -fx-pref-width: 300;
+}
+
+#leftPart{
+   -fx-background-color: #e0d236;
+}
+
+#loginButton {
+   -fx-alignment: center;
+}
+
+#cancelButton {
+   -fx-alignment: center;
+}

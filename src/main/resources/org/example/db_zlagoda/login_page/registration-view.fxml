@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="618.0" prefWidth="930.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.login_page.RegistrationController">
+   <children>
+      <AnchorPane fx:id="registrationFormLabel" prefHeight="82.0" prefWidth="1000.0" style="-fx-background-color: #111111;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+         <children>
+            <Label fx:id="regFormTitle" layoutX="39.0" layoutY="31.0" text="Registrration Form" textFill="WHITE" />
+         </children>
+      </AnchorPane>
+      <Label fx:id="firstNameLabel" layoutX="72.0" layoutY="111.0" text="First name" />
+      <TextField fx:id="firstNameField" layoutX="75.0" layoutY="132.0" prefHeight="31.0" prefWidth="619.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
+      <Label fx:id="lastNameLabel" layoutX="73.0" layoutY="163.0" text="Last name" />
+      <TextField fx:id="lastNameField" layoutX="72.0" layoutY="185.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
+      <Label fx:id="usernameLabel" layoutX="501.0" layoutY="321.0" text="Username" />
+      <TextField fx:id="userNameField" layoutX="500.0" layoutY="342.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
+      <Label fx:id="passwordLabel" layoutX="502.0" layoutY="373.0" text="Password" />
+      <PasswordField fx:id="passportField" layoutX="500.0" layoutY="394.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
+      <Label fx:id="confPasswordLabel" layoutX="501.0" layoutY="425.0" text="Confirm password" />
+      <PasswordField fx:id="confPassportField" layoutX="500.0" layoutY="446.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
+      <Label fx:id="convBoxLabel" layoutX="73.0" layoutY="269.0" text="Role" />
+      <ComboBox fx:id="roleComBox" layoutX="72.0" layoutY="290.0" onAction="#Select" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
+      <Button fx:id="registerButton" layoutX="74.0" layoutY="504.0" mnemonicParsing="false" onAction="#registerButtonOnAction" prefHeight="25.0" prefWidth="436.0" text="Register" AnchorPane.leftAnchor="74.0" AnchorPane.rightAnchor="70.0" />
+      <Button fx:id="cancelButton" layoutX="74.0" layoutY="551.0" mnemonicParsing="false" onAction="#cancelButtonOnAction" prefHeight="25.0" prefWidth="436.0" text="Cancel" AnchorPane.leftAnchor="74.0" AnchorPane.rightAnchor="70.0" />
+      <Label fx:id="patronymicLabel" layoutX="73.0" layoutY="216.0" text="Patronymic" />
+      <TextField fx:id="patronymicField" layoutX="72.0" layoutY="238.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
+      <Label fx:id="convBoxLabel1" layoutX="73.0" layoutY="321.0" text="Salary" />
+      <TextField fx:id="salaryField" layoutX="72.0" layoutY="342.0" prefHeight="31.0" prefWidth="619.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
+      <Label fx:id="birthDateLabel" layoutX="73.0" layoutY="373.0" text="Birth date" AnchorPane.leftAnchor="73.0" />
+      <DatePicker fx:id="birthDatePicker" layoutX="73.0" layoutY="394.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
+      <Label fx:id="firstWorkDayLabel" layoutX="73.0" layoutY="426.0" text="First day of work" />
+      <DatePicker fx:id="firstWorkDayPicker" layoutX="72.0" layoutY="447.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
+      <Label fx:id="phoneNumberLabel" layoutX="501.0" layoutY="113.0" text="Phone number" AnchorPane.leftAnchor="501.0" />
+      <TextField fx:id="phoneNumberField" layoutX="500.0" layoutY="134.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
+      <Label fx:id="cityLabel" layoutX="501.0" layoutY="165.0" text="City" AnchorPane.leftAnchor="501.0" />
+      <TextField fx:id="cityField" layoutX="500.0" layoutY="186.0" prefHeight="31.0" prefWidth="619.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
+      <Label fx:id="streetLabel" layoutX="501.0" layoutY="217.0" text="Street" />
+      <TextField fx:id="streetField" layoutX="500.0" layoutY="238.0" prefHeight="31.0" prefWidth="619.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
+      <Label fx:id="zipCodeLabel" layoutX="501.0" layoutY="269.0" text="Zip code" />
+      <TextField fx:id="zipCodeField" layoutX="500.0" layoutY="290.0" prefHeight="31.0" prefWidth="619.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
+      <Label fx:id="firstNameValidator" alignment="CENTER_RIGHT" layoutX="323.0" layoutY="111.0" textFill="RED" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="572.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="firstNameValidatorTT" text="Enter first name" />
+         </tooltip>
+      </Label>
+      <Label fx:id="lastNameValidator" alignment="CENTER_RIGHT" layoutX="323.0" layoutY="165.0" textFill="RED" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="572.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="lastNameValidatorTT" text="Enter last name" />
+         </tooltip>
+      </Label>
+      <Label fx:id="roleValidator" alignment="CENTER_RIGHT" layoutX="334.0" layoutY="272.0" textFill="RED" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="572.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="roleValidatorTT" text="Choose role" />
+         </tooltip>
+      </Label>
+      <Label fx:id="salaryValidator" alignment="CENTER_RIGHT" layoutX="334.0" layoutY="324.0" textFill="RED" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="572.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="salaryValidatorTT" text="Enter salary" />
+         </tooltip>
+      </Label>
+      <Label fx:id="birthDateValidator" alignment="CENTER_RIGHT" layoutX="334.0" layoutY="376.0" textFill="RED" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="572.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="birthDateValidatorTT" text="Choose birth date" />
+         </tooltip>
+      </Label>
+      <Label fx:id="firstWorkDayValidator" alignment="CENTER_RIGHT" layoutX="334.0" layoutY="429.0" textFill="RED" AnchorPane.leftAnchor="190.0" AnchorPane.rightAnchor="572.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="firstWorkDayValidatorTT" text="Choose first work day" />
+         </tooltip>
+      </Label>
+      <Label fx:id="phoneNumValidator" alignment="CENTER_RIGHT" layoutX="762.0" layoutY="116.0" textFill="RED" AnchorPane.leftAnchor="605.0" AnchorPane.rightAnchor="144.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="phoneNumValidatorTT" text="Enter phone number" />
+         </tooltip>
+      </Label>
+      <Label fx:id="cityValidator" alignment="CENTER_RIGHT" layoutX="762.0" layoutY="168.0" textFill="RED" AnchorPane.leftAnchor="605.0" AnchorPane.rightAnchor="144.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="cityValidatorTT" text="Enter city" />
+         </tooltip>
+      </Label>
+      <Label fx:id="streetValidator" alignment="CENTER_RIGHT" layoutX="549.0" layoutY="219.0" prefHeight="15.0" prefWidth="237.0" textFill="RED" AnchorPane.leftAnchor="605.0" AnchorPane.rightAnchor="144.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="streetValidatorTT" text="Enter street" />
+         </tooltip>
+      </Label>
+      <Label fx:id="zipCodeValidator" alignment="CENTER_RIGHT" layoutX="762.0" layoutY="272.0" textFill="RED" AnchorPane.leftAnchor="605.0" AnchorPane.rightAnchor="144.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="zipCodeValidatorTT" text="Enter zip code" />
+         </tooltip>
+      </Label>
+      <Label fx:id="usernameValidator" alignment="CENTER_RIGHT" layoutX="762.0" layoutY="324.0" textFill="RED" AnchorPane.leftAnchor="605.0" AnchorPane.rightAnchor="144.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="usernameValidatorTT" text="Enter username" />
+         </tooltip>
+      </Label>
+      <Label fx:id="passwordValidator" alignment="CENTER_RIGHT" layoutX="762.0" layoutY="376.0" textFill="RED" AnchorPane.leftAnchor="605.0" AnchorPane.rightAnchor="144.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="passwordValidatorTT" text="Create password" />
+         </tooltip>
+      </Label>
+      <Label fx:id="confPassportValidator" alignment="CENTER_RIGHT" layoutX="762.0" layoutY="428.0" textFill="RED" AnchorPane.leftAnchor="630.0" AnchorPane.rightAnchor="144.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+         <tooltip>
+            <Tooltip fx:id="confPassportValidatorTT" text="Confirm password" />
+         </tooltip>
+      </Label>
+   </children>
+</AnchorPane>
