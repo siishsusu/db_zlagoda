@@ -60,7 +60,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>org.example.db_zlagoda/org.example.db_zlagoda.HelloApplication</mainClass>
+                            <mainClass>org.example.db_zlagoda/org.example.db_zlagoda.login_page.LoginPage</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
