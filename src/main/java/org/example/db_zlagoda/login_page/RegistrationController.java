@@ -55,10 +55,13 @@ public class RegistrationController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        clearDatabase();
+        fillDataBase();
+
         ObservableList<String> options =
                 FXCollections.observableArrayList(
-                        "Manager",
-                        "Cashier"
+                        "Менеджер",
+                        "Касир"
                 );
         roleComBox.setItems(options);
 
@@ -252,6 +255,7 @@ public class RegistrationController implements Initializable {
         try {
             String id_gen = generateRandomId(10);
 
+            // 1.1. Додавати нові дані про працівників
             String insertUserQuery = "INSERT INTO employee (id_employee, empl_surname, empl_name, empl_patronymic, empl_role, salary, " +
                     "date_of_birth, date_of_start, phone_number, city, street, zip_code) " +
                     "VALUES ('" + id_gen + "', '" + lastName + "', '" + firstName + "', '" + patronymic + "', '" + role + "', '" + salary + "', '" +
@@ -296,9 +300,13 @@ public class RegistrationController implements Initializable {
         Connection connectDB = connection.getConnection();
 
         try {
+            String clearDatabaseLogin = "DELETE FROM login_table";
             String clearDatabaseQuery = "DELETE FROM employee";
+
             Statement statement = connectDB.createStatement();
+            statement.executeUpdate(clearDatabaseLogin);
             statement.executeUpdate(clearDatabaseQuery);
+
         } catch (SQLException error) {
             error.printStackTrace();
         } finally {
@@ -320,5 +328,92 @@ public class RegistrationController implements Initializable {
             idBuilder.append(randomChar);
         }
         return idBuilder.toString();
+    }
+
+
+    // -----------------------------------------------------------------------------------------------------------------
+    public void fillDataBase(){
+        String[] lastNames = {"Петренко", "Іваненко", "Коваленко", "Сидоренко", "Мельник", "Ковальчук", "Павленко",
+                "Кравченко", "Шевченко", "Бойко", "Кузьменко", "Шевчук", "Савченко", "Мороз", "Бондаренко", "Ткаченко",
+                "Кучеренко", "Захаренко", "Коваленко", "Романенко"};
+        String[] firstNames = {"Олександр", "Іван", "Софія", "Марія", "Максим", "Анна", "Віктор", "Ольга", "Артем", "Юлія",
+                "Василь", "Катерина", "Дмитро", "Тетяна", "Анастасія", "Петро", "Христина", "Сергій", "Наталія", "Андрій"};
+        String[] middleNames = {"Олександрович", "Іванович", "Володимирівна", "Петрівна", "Миколайович", "Андріївна",
+                "Сергійович", "Ярославівна", "Артемович", "Дмитрівна", "Васильович", "Віталіївна", "Ігорович",
+                "Олегівна", "Владиславівна", "Романович", "Тарасівна", "Богданович", "Григоріївна", "Максимович"};
+        String[] roles = {"Менеджер", "Касир"};
+        double[] salaries = {8000.0, 8200.0, 8500.0, 8700.0, 9000.0, 9200.0, 9400.0, 9600.0, 9800.0, 10000.0, 6000.0, 6200.0, 6400.0, 6600.0, 6800.0, 7000.0, 7200.0, 7400.0, 7600.0, 7800.0};
+        LocalDate[] birthDates = {
+                LocalDate.of(1990, 5, 15), LocalDate.of(1985, 8, 25), LocalDate.of(1987, 12, 10), LocalDate.of(1992, 3, 6),
+                LocalDate.of(1988, 9, 18), LocalDate.of(1995, 2, 3), LocalDate.of(1983, 7, 22), LocalDate.of(1997, 11, 14),
+                LocalDate.of(1991, 4, 30), LocalDate.of(1986, 10, 8), LocalDate.of(1993, 6, 12), LocalDate.of(1989, 1, 28),
+                LocalDate.of(1994, 5, 7), LocalDate.of(1984, 11, 20), LocalDate.of(1999, 8, 2), LocalDate.of(1982, 12, 17),
+                LocalDate.of(1996, 3, 25), LocalDate.of(1980, 6, 5), LocalDate.of(1981, 9, 9), LocalDate.of(1998, 1, 1)
+        };
+        LocalDate[] firstWorkDays = {
+                LocalDate.of(2010, 9, 20), LocalDate.of(2012, 7, 14), LocalDate.of(2008, 11, 30), LocalDate.of(2015, 4, 5),
+                LocalDate.of(2007, 3, 12), LocalDate.of(2018, 5, 28), LocalDate.of(2004, 10, 3), LocalDate.of(2017, 9, 16),
+                LocalDate.of(2009, 8, 8), LocalDate.of(2013, 8, 21), LocalDate.of(2017, 6, 19), LocalDate.of(2016, 12, 10),
+                LocalDate.of(2023, 1, 22), LocalDate.of(2019, 11, 7), LocalDate.of(2023, 7, 2), LocalDate.of(2014, 10, 14),
+                LocalDate.of(2022, 4, 18), LocalDate.of(2020, 2, 29), LocalDate.of(2001, 9, 4), LocalDate.of(2021, 3, 8)
+        };
+        String[] phoneNumbers = {
+                "+380661234567", "+380990123456", "+380951234567", "+380981234567", "+380664567890", "+380997654321",
+                "+380955432109", "+380986543210", "+380669876543", "+380992345678", "+380954321098", "+380983456789",
+                "+380667890123", "+380998765432", "+380958765432", "+380987654321", "+380662345678", "+380994567890",
+                "+380953210987", "+380982109876"
+        };
+        String[] cities = {
+                "Київ", "Харків", "Одеса", "Дніпро", "Львів", "Запоріжжя", "Кривий Ріг", "Миколаїв", "Вінниця", "Херсон",
+                "Полтава", "Чернігів", "Черкаси", "Житомир", "Суми", "Івано-Франківськ", "Тернопіль", "Кропивницький",
+                "Ужгород", "Маріуполь"
+        };
+        String[] streets = {
+                "Вулиця Шевченка", "Проспект Незалежності", "Вулиця Лесі Українки", "Вулиця Воздвиженська", "Вулиця Тараса Шевченка",
+                "Вулиця Івана Франка", "Проспект Гагаріна", "Вулиця Миру", "Проспект Коцюбинського", "Вулиця Арнаутська",
+                "Вулиця Героїв Крут", "Вулиця Джеймса Мейса", "Вулиця Степана Бандери", "Вулиця Юрія Вороного", "Вулиця Київська",
+                "Вулиця Незалежності", "Вулиця Гетьмана Мазепи", "Вулиця Вокзальна", "Вулиця Івана Франка", "Вулиця М. Грушевського"
+        };
+        String[] zipCodes = {
+                "01001", "02000", "03000", "04000", "05000", "06000", "07000", "08000", "09000", "10000", "11000", "12000",
+                "13000", "14000", "15000", "16000", "17000", "18000", "19000", "20000"
+        };
+        String[] usernames = {
+                "oleksandr_petrenko", "ivan_ivanenko", "sofiia_kovalenko", "maria_sydorenko", "maxym_melnyk", "anna_kovalchuk",
+                "viktor_pavlenko", "olha_kravchenko", "artem_shevchenko", "yuliia_boiko", "vasyl_kuzmenko", "kateryna_shevchuk",
+                "dmytro_savchenko", "tetiana_moroz", "anastasiia_bondarenko", "petro_tkachenko", "hryhorii_kucherenko",
+                "nataliia_zakharenko", "andrii_kovalenko", "serhii_romanenko"
+        };
+        String[] passwords = {
+                "qwerty123", "password123", "123456789", "letmein", "welcome123", "abc123", "123456", "password1", "passw0rd",
+                "admin123", "qwertyuiop", "iloveyou", "football", "1234567", "123123", "111111", "12345678", "qwerty",
+                "password", "1234"
+        };
+        try {
+            DatabaseConnection connection = new DatabaseConnection();
+            Connection connectDB = connection.getConnection();
+            Statement statement = connectDB.createStatement();
+
+            for (int i = 0; i < lastNames.length; i++) {
+                String id_gen = generateRandomId(10);
+                int randomRole = random.nextInt(roles.length);
+
+                String insertQuery = "INSERT INTO employee (id_employee, empl_surname, empl_name, empl_patronymic, empl_role, salary, date_of_birth, date_of_start, phone_number, city, street, zip_code) " +
+                        "VALUES ('" + id_gen + "', '" + lastNames[i] + "', '" + firstNames[i] + "', '" + middleNames[i] + "', '" + roles[randomRole] + "', " + salaries[i] + ", '" +
+                        birthDates[i] + "', '" + firstWorkDays[i] + "', '" + phoneNumbers[i] + "', '" + cities[i] + "', '" + streets[i] + "', '" + zipCodes[i] + "')";
+
+
+                String insertLoginInfo = "INSERT INTO login_table (username, password, id_employee) " +
+                        "VALUES ('" + usernames[i] + "', '" + hashPassword(passwords[i]) + "', '" + id_gen + "')";
+
+                statement.executeUpdate(insertQuery);
+                statement.executeUpdate(insertLoginInfo);
+            }
+
+            statement.close();
+            connectDB.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

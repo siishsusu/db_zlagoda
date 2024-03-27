@@ -17,35 +17,35 @@
             <Label fx:id="regFormTitle" layoutX="39.0" layoutY="31.0" text="Registrration Form" textFill="WHITE" />
          </children>
       </AnchorPane>
-      <Label fx:id="firstNameLabel" layoutX="72.0" layoutY="111.0" text="First name" />
+      <Label fx:id="firstNameLabel" layoutX="72.0" layoutY="111.0" text="Повне ім'я" />
       <TextField fx:id="firstNameField" layoutX="75.0" layoutY="132.0" prefHeight="31.0" prefWidth="619.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
-      <Label fx:id="lastNameLabel" layoutX="73.0" layoutY="163.0" text="Last name" />
+      <Label fx:id="lastNameLabel" layoutX="73.0" layoutY="163.0" text="Прізвище" />
       <TextField fx:id="lastNameField" layoutX="72.0" layoutY="185.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
       <Label fx:id="usernameLabel" layoutX="501.0" layoutY="321.0" text="Username" />
       <TextField fx:id="userNameField" layoutX="500.0" layoutY="342.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
-      <Label fx:id="passwordLabel" layoutX="502.0" layoutY="373.0" text="Password" />
+      <Label fx:id="passwordLabel" layoutX="502.0" layoutY="373.0" text="Пароль" />
       <PasswordField fx:id="passportField" layoutX="500.0" layoutY="394.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
-      <Label fx:id="confPasswordLabel" layoutX="501.0" layoutY="425.0" text="Confirm password" />
+      <Label fx:id="confPasswordLabel" layoutX="501.0" layoutY="425.0" text="Підтвердіть пароль" />
       <PasswordField fx:id="confPassportField" layoutX="500.0" layoutY="446.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
-      <Label fx:id="convBoxLabel" layoutX="73.0" layoutY="269.0" text="Role" />
+      <Label fx:id="convBoxLabel" layoutX="73.0" layoutY="269.0" text="Посада" />
       <ComboBox fx:id="roleComBox" layoutX="72.0" layoutY="290.0" onAction="#Select" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
-      <Button fx:id="registerButton" layoutX="74.0" layoutY="504.0" mnemonicParsing="false" onAction="#registerButtonOnAction" prefHeight="25.0" prefWidth="436.0" text="Register" AnchorPane.leftAnchor="74.0" AnchorPane.rightAnchor="70.0" />
-      <Button fx:id="cancelButton" layoutX="74.0" layoutY="551.0" mnemonicParsing="false" onAction="#cancelButtonOnAction" prefHeight="25.0" prefWidth="436.0" text="Cancel" AnchorPane.leftAnchor="74.0" AnchorPane.rightAnchor="70.0" />
-      <Label fx:id="patronymicLabel" layoutX="73.0" layoutY="216.0" text="Patronymic" />
+      <Button fx:id="registerButton" layoutX="74.0" layoutY="504.0" mnemonicParsing="false" onAction="#registerButtonOnAction" prefHeight="25.0" prefWidth="436.0" text="Зареєструватися" AnchorPane.leftAnchor="74.0" AnchorPane.rightAnchor="70.0" />
+      <Button fx:id="cancelButton" layoutX="74.0" layoutY="551.0" mnemonicParsing="false" onAction="#cancelButtonOnAction" prefHeight="25.0" prefWidth="436.0" text="Вихід" AnchorPane.leftAnchor="74.0" AnchorPane.rightAnchor="70.0" />
+      <Label fx:id="patronymicLabel" layoutX="73.0" layoutY="216.0" text="По-батькові" />
       <TextField fx:id="patronymicField" layoutX="72.0" layoutY="238.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
-      <Label fx:id="convBoxLabel1" layoutX="73.0" layoutY="321.0" text="Salary" />
+      <Label fx:id="convBoxLabel1" layoutX="73.0" layoutY="321.0" text="Заробітня плата" />
       <TextField fx:id="salaryField" layoutX="72.0" layoutY="342.0" prefHeight="31.0" prefWidth="619.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
-      <Label fx:id="birthDateLabel" layoutX="73.0" layoutY="373.0" text="Birth date" AnchorPane.leftAnchor="73.0" />
+      <Label fx:id="birthDateLabel" layoutX="73.0" layoutY="373.0" text="Дата народження" AnchorPane.leftAnchor="73.0" />
       <DatePicker fx:id="birthDatePicker" layoutX="73.0" layoutY="394.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
-      <Label fx:id="firstWorkDayLabel" layoutX="73.0" layoutY="426.0" text="First day of work" />
+      <Label fx:id="firstWorkDayLabel" layoutX="73.0" layoutY="426.0" text="Дата початку роботи" />
       <DatePicker fx:id="firstWorkDayPicker" layoutX="72.0" layoutY="447.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="72.0" AnchorPane.rightAnchor="572.0" />
-      <Label fx:id="phoneNumberLabel" layoutX="501.0" layoutY="113.0" text="Phone number" AnchorPane.leftAnchor="501.0" />
+      <Label fx:id="phoneNumberLabel" layoutX="501.0" layoutY="113.0" text="Номер телефону" AnchorPane.leftAnchor="501.0" />
       <TextField fx:id="phoneNumberField" layoutX="500.0" layoutY="134.0" prefHeight="25.0" prefWidth="436.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
-      <Label fx:id="cityLabel" layoutX="501.0" layoutY="165.0" text="City" AnchorPane.leftAnchor="501.0" />
+      <Label fx:id="cityLabel" layoutX="501.0" layoutY="165.0" text="Місто" AnchorPane.leftAnchor="501.0" />
       <TextField fx:id="cityField" layoutX="500.0" layoutY="186.0" prefHeight="31.0" prefWidth="619.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
-      <Label fx:id="streetLabel" layoutX="501.0" layoutY="217.0" text="Street" />
+      <Label fx:id="streetLabel" layoutX="501.0" layoutY="217.0" text="Вулиця" />
       <TextField fx:id="streetField" layoutX="500.0" layoutY="238.0" prefHeight="31.0" prefWidth="619.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
-      <Label fx:id="zipCodeLabel" layoutX="501.0" layoutY="269.0" text="Zip code" />
+      <Label fx:id="zipCodeLabel" layoutX="501.0" layoutY="269.0" text="Індекс" />
       <TextField fx:id="zipCodeField" layoutX="500.0" layoutY="290.0" prefHeight="31.0" prefWidth="619.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="144.0" />
       <Label fx:id="firstNameValidator" alignment="CENTER_RIGHT" layoutX="323.0" layoutY="111.0" textFill="RED" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="572.0">
          <font>
@@ -79,7 +79,7 @@
             <Tooltip fx:id="salaryValidatorTT" text="Enter salary" />
          </tooltip>
       </Label>
-      <Label fx:id="birthDateValidator" alignment="CENTER_RIGHT" layoutX="334.0" layoutY="376.0" textFill="RED" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="572.0">
+      <Label fx:id="birthDateValidator" alignment="CENTER_RIGHT" layoutX="202.0" layoutY="376.0" prefHeight="15.0" prefWidth="156.0" textFill="RED" AnchorPane.leftAnchor="202.0" AnchorPane.rightAnchor="572.0">
          <font>
             <Font size="10.0" />
          </font>
@@ -87,7 +87,7 @@
             <Tooltip fx:id="birthDateValidatorTT" text="Choose birth date" />
          </tooltip>
       </Label>
-      <Label fx:id="firstWorkDayValidator" alignment="CENTER_RIGHT" layoutX="334.0" layoutY="429.0" textFill="RED" AnchorPane.leftAnchor="190.0" AnchorPane.rightAnchor="572.0">
+      <Label fx:id="firstWorkDayValidator" alignment="CENTER_RIGHT" layoutX="220.0" layoutY="429.0" prefHeight="15.0" prefWidth="138.0" textFill="RED" AnchorPane.leftAnchor="220.0" AnchorPane.rightAnchor="572.0">
          <font>
             <Font size="10.0" />
          </font>

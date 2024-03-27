@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="616.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.employees_list.EmployeesListController">
+   <children>
+      <TableView fx:id="employeesTable" layoutX="24.0" layoutY="25.0" prefHeight="491.0" prefWidth="900.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
+        <columns>
+          <TableColumn fx:id="idColumn" prefWidth="75.0" text="id" />
+          <TableColumn fx:id="surnameColumn" prefWidth="75.0" text="Прізвище" />
+            <TableColumn fx:id="nameColumn" prefWidth="75.0" text="Ім'я" />
+            <TableColumn fx:id="patronymicColumn" prefWidth="75.0" text="По-батькові" />
+            <TableColumn fx:id="roleColumn" prefWidth="75.0" text="Посада" />
+            <TableColumn fx:id="salaryColumn" prefWidth="75.0" text="Заробітня плата" />
+            <TableColumn fx:id="dobColumn" prefWidth="75.0" text="Дата народження" />
+            <TableColumn fx:id="startColumn" prefWidth="75.0" text="Дата початку роботи" />
+            <TableColumn fx:id="phoneColumn" prefWidth="75.0" text="Номер телефону" />
+            <TableColumn fx:id="cityColumn" prefWidth="75.0" text="Місто" />
+            <TableColumn fx:id="streetColumn" prefWidth="75.0" text="Вулиця" />
+            <TableColumn fx:id="zipColumn" prefWidth="75.0" text="Поштовий індекс" />
+        </columns>
+      </TableView>
+      <Button fx:id="updateButton" layoutX="367.0" layoutY="524.0" mnemonicParsing="false" onAction="#updateButtonOnAction" text="Оновити інформацію про працівника" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="680.0" />
+      <Button fx:id="deleteButton" layoutX="665.0" layoutY="524.0" mnemonicParsing="false" onAction="#deleteButtonOnAction" text="Видалити інформацію про працівника" AnchorPane.rightAnchor="50.0" />
+      <Button fx:id="addButton" layoutX="373.0" layoutY="524.0" mnemonicParsing="false" onAction="#addButtonOnAction" text="Додати інформацію про працівника" AnchorPane.leftAnchor="360.0" AnchorPane.rightAnchor="360.0" />
+      <Button fx:id="findButton" layoutX="372.0" layoutY="571.0" mnemonicParsing="false" onAction="#findAddressAndPhoneButtonOnAction" text="Знайти адресу і телефон працівника" AnchorPane.leftAnchor="360.0" AnchorPane.rightAnchor="360.0" />
+   </children>
+</AnchorPane>

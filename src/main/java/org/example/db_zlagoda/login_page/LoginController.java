@@ -7,10 +7,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.example.db_zlagoda.DatabaseConnection;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 
 public class LoginController {
     @FXML
@@ -42,6 +39,7 @@ public class LoginController {
         Connection connectDB = connection.getConnection();
 
         String username_str = userNameTextField.getText(), password_str = RegistrationController.hashPassword(PasswordTextField.getText());
+        // Верифікація користувачів
         String verifyLogin = "SELECT COUNT(1) FROM login_table WHERE username = '" + username_str +
                 "' AND password = '" + password_str + "'";
 
@@ -61,5 +59,4 @@ public class LoginController {
             error.getCause();
         }
     }
-
 }
