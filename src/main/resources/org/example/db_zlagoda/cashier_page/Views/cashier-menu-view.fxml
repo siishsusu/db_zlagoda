@@ -4,13 +4,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.text.Font?>
 <HBox fx:id="cashierMenuContainer" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.db_zlagoda.cashier_page.Controllers.CashierMenuViewController">
     <VBox maxWidth="200.0" minWidth="200" spacing="20.0">
         <padding>
             <Insets bottom="5.0" left="10.0" right="10.0" top="10.0"/>
         </padding>
-        <Button alignment="TOP_CENTER" maxWidth="1.7976931348623157E308" text="Профіль"/>
+        <Button fx:id="userProfileButton" onAction="#openUserProfile" alignment="TOP_CENTER" maxWidth="1.7976931348623157E308" text="Профіль"/>
         <VBox spacing="5">
             <Button fx:id="productsButton" onAction="#openProducts" alignment="TOP_CENTER" maxWidth="1.7976931348623157E308" text="Товари"/>
             <Button fx:id="clientsButton" onAction="#openClients" alignment="TOP_CENTER" maxWidth="1.7976931348623157E308" text="Клієнти"/>
@@ -35,17 +36,18 @@
                     </padding>
                     <children>
                         <Button mnemonicParsing="false" text="Очистити"/>
-                        <Button mnemonicParsing="false" text="Додати товар"/>
+                        <Button mnemonicParsing="false" text="Видалити товар" onAction="#removeSelectedProduct"/>
+                        <Button mnemonicParsing="false" text="Додати товар" onAction="#openAddProductMenu"/>
                         <Label alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Чек #005832"
                                HBox.hgrow="ALWAYS"/>
                     </children>
                 </HBox>
-                <TableView nodeOrientation="LEFT_TO_RIGHT" prefHeight="1000">
+                <TableView fx:id="receiptTable" nodeOrientation="LEFT_TO_RIGHT" prefHeight="1000">
                     <columns>
-                        <TableColumn text="UTC"/>
-                        <TableColumn text="Назва"/>
-                        <TableColumn text="Кількість"/>
-                        <TableColumn/>
+                        <TableColumn fx:id="receipt_utc" text="UTC"/>
+                        <TableColumn fx:id="receipt_name" text="Назва"/>
+                        <TableColumn fx:id="receipt_amount" text="Кількість"/>
+                        <TableColumn fx:id="receipt_price" text="Ціна"/>
                     </columns>
                     <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
@@ -74,7 +76,6 @@
                     <HBox alignment="CENTER_LEFT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="900.0" spacing="5.0">
                         <children>
                             <Button mnemonicParsing="false" text="Фільтри" />
-                            <Button mnemonicParsing="false" text="Додати товар" />
                             <TextArea nodeOrientation="LEFT_TO_RIGHT" maxWidth="1.7976931348623157E308" prefWidth="200.0" HBox.hgrow="ALWAYS" />
                         </children>
                         <padding>
@@ -89,7 +90,7 @@
                             <TableColumn fx:id="product_utc" text="UTC" />
                             <TableColumn fx:id="product_name" text="Назва" />
                             <TableColumn fx:id="product_amount" text="Кількість" />
-                            <TableColumn fx:id="product_availability" text="Наявність" />
+                            <TableColumn fx:id="product_price" text="Ціна" />
                         </columns>
                     </TableView>
                 </children>
@@ -107,7 +108,6 @@
                     <HBox alignment="CENTER_LEFT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="900.0" spacing="5.0">
                         <children>
                             <Button mnemonicParsing="false" text="Фільтри" />
-                            <Button mnemonicParsing="false" text="Додати товар" />
                             <TextArea nodeOrientation="LEFT_TO_RIGHT" maxWidth="1.7976931348623157E308" prefWidth="200.0" HBox.hgrow="ALWAYS" />
                         </children>
                         <padding>
@@ -126,6 +126,95 @@
                             <TableColumn fx:id="client_discount" text="Знижка" />
                         </columns>
                     </TableView>
+                </children>
+            </VBox>
+        </children>
+        <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+        </padding>
+    </VBox>
+
+    <VBox fx:id="userProfileMenu" prefWidth="1000" spacing="10">
+        <children>
+            <Label text="Мій профіль" />
+            <VBox prefWidth="900">
+                <children>
+                    <Label text="ID" />
+                    <Label text="00728">
+                        <font>
+                            <Font size="15.0" />
+                        </font>
+                    </Label>
+                </children>
+            </VBox>
+            <VBox prefWidth="900">
+                <children>
+                    <Label text="ПІБ" />
+                    <Label text="Софчук Валентин Тарасович">
+                        <font>
+                            <Font size="15.0" />
+                        </font>
+                    </Label>
+                </children>
+            </VBox>
+            <VBox prefWidth="900">
+                <children>
+                    <Label text="Посада" />
+                    <Label text="Касир">
+                        <font>
+                            <Font size="15.0" />
+                        </font>
+                    </Label>
+                </children>
+            </VBox>
+            <VBox prefWidth="900">
+                <children>
+                    <Label text="Зарплата" />
+                    <Label text="16000 грн">
+                        <font>
+                            <Font size="15.0" />
+                        </font>
+                    </Label>
+                </children>
+            </VBox>
+            <VBox prefWidth="900">
+                <children>
+                    <Label text="Дата початку роботи" />
+                    <Label text="02.07.2023">
+                        <font>
+                            <Font size="15.0" />
+                        </font>
+                    </Label>
+                </children>
+            </VBox>
+            <VBox prefWidth="900">
+                <children>
+                    <Label text="Дата народження" />
+                    <Label text="07.09.2001">
+                        <font>
+                            <Font size="15.0" />
+                        </font>
+                    </Label>
+                </children>
+            </VBox>
+            <VBox prefWidth="900">
+                <children>
+                    <Label text="Контактний телефон" />
+                    <Label text="+380 95 040 5891">
+                        <font>
+                            <Font size="15.0" />
+                        </font>
+                    </Label>
+                </children>
+            </VBox>
+            <VBox prefWidth="900">
+                <children>
+                    <Label text="Адреса" />
+                    <Label text="м. Київ, вул. Велика Васильківська, 14-А, кв. 81">
+                        <font>
+                            <Font size="15.0" />
+                        </font>
+                    </Label>
                 </children>
             </VBox>
         </children>

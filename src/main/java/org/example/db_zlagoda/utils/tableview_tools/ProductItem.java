@@ -1,16 +1,16 @@
-package org.example.db_zlagoda.tableview_tools;
+package org.example.db_zlagoda.utils.tableview_tools;
 
-public class ProductTableItem {
+public class ProductItem {
 
     private String name;
     private int amount;
     private String utc;
-    private String availability;
-    public ProductTableItem(String utc, String name, int amount, String availability) {
+    private double price;
+    public ProductItem(String utc, String name, int amount, double price) {
         this.utc = utc;
         this.name = name;
         this.amount = amount;
-        this.availability = availability;
+        this.price = price;
     }
 
     public int getAmount() {
@@ -25,16 +25,16 @@ public class ProductTableItem {
         return utc;
     }
 
-    public String getAvailability() {
-        return availability;
+    public double getPrice() {
+        return price;
     }
 
     public void setAmount(int amount) {
         this.amount = amount;
     }
 
-    public void setAvailability(String availability) {
-        this.availability = availability;
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     public void setName(String name) {

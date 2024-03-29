@@ -1,11 +1,11 @@
-package org.example.db_zlagoda.tableview_tools;
+package org.example.db_zlagoda.utils.tableview_tools;
 
-public class ClientTableItem {
+public class ClientItem {
 
     private String card_id, name, phone, address;
     public double discount;
 
-    public ClientTableItem(String card_id, String name, String phone, String address, double discount) {
+    public ClientItem(String card_id, String name, String phone, String address, double discount) {
         this.card_id = card_id;
         this.name = name;
         this.phone = phone;
