@@ -4,9 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.example.db_zlagoda.utils.tableview_tools.ProductItem;
@@ -18,6 +16,9 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public class CashierMenuViewController {
+    @FXML
+    public Label idField, PIBField, roleField, salaryField, firstDayField, birthDateField, phoneField, addressField;
+
     public HBox cashierMenuContainer;
 
     public VBox receiptMenu;
@@ -85,6 +86,18 @@ public class CashierMenuViewController {
         openMenu(userProfileMenu);
         enableAllButtons();
         userProfileButton.setDisable(true);
+    }
+
+    public void setUserInfo(String id, String PIB, String role, String salary, String firstDay,
+                            String birthDate, String phone, String address){
+        idField.setText(id);
+        PIBField.setText(PIB);
+        roleField.setText(role);
+        salaryField.setText(salary);
+        firstDayField.setText(firstDay);
+        birthDateField.setText(birthDate);
+        phoneField.setText(phone);
+        addressField.setText(address);
     }
 
     @FXML

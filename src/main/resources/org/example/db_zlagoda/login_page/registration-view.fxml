@@ -151,5 +151,6 @@
             <Tooltip fx:id="confPassportValidatorTT" text="Confirm password" />
          </tooltip>
       </Label>
+      <Button fx:id="generateUsernameButton" layoutX="795.0" layoutY="342.0" mnemonicParsing="false" onAction="#generateUsernameButtonOnAction" prefHeight="25.0" text="Згенерувати" />
    </children>
 </AnchorPane>

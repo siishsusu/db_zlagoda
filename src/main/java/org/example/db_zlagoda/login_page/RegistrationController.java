@@ -17,6 +17,7 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.ResourceBundle;
 
 public class RegistrationController implements Initializable {
@@ -24,7 +25,7 @@ public class RegistrationController implements Initializable {
     private ComboBox<String> roleComBox;
 
     @FXML
-    private Button cancelButton;
+    private Button cancelButton, generateUsernameButton;
     public void cancelButtonOnAction(ActionEvent event){
         Stage stage = (Stage) cancelButton.getScene().getWindow();
         stage.close();
@@ -55,8 +56,8 @@ public class RegistrationController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        clearDatabase();
-        fillDataBase();
+
+        generateUsernameButton.setDisable(true);
 
         ObservableList<String> options =
                 FXCollections.observableArrayList(
@@ -81,10 +82,98 @@ public class RegistrationController implements Initializable {
         requiredDates.add(birthDatePicker);
         requiredDates.add(firstWorkDayPicker);
 
+        if (!firstNameField.getText().isBlank() && !lastNameField.getText().isBlank()){
+            generateUsernameButton.setDisable(false);
+        }
+
+        firstNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            lastNameField.textProperty().addListener((observable_last, oldValue_last, newValue_last) -> {
+                if (!newValue_last.isBlank() && !newValue.isBlank()) {
+                    generateUsernameButton.setDisable(false);
+                } else {
+                    generateUsernameButton.setDisable(true);
+                }
+            });
+        });
+
+        userNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            try{
+                DatabaseConnection connection = new DatabaseConnection();
+                Connection connectDB = connection.getConnection();
+                Statement statement = connectDB.createStatement();
+                // Перевірка унікальності username
+                ResultSet usernameCollision = statement.executeQuery(
+                        "SELECT * " +
+                                "FROM login_table " +
+                                "WHERE username = '" + newValue + "'");
+                if(usernameCollision.next()){
+                    userNameField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+                }else{
+                    userNameField.setStyle(null);
+                }
+            }catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @FXML
     void Select(ActionEvent event) {
+    }
+
+    @FXML
+    public void generateUsernameButtonOnAction(ActionEvent event){
+        String name = firstNameField.getText().toLowerCase();
+        String surname = lastNameField.getText().toLowerCase();
+        String username_gen = transliterateUkrainianToEnglish(name) + "_" + transliterateUkrainianToEnglish(surname);
+        try {
+            DatabaseConnection connection = new DatabaseConnection();
+            Connection connectDB = connection.getConnection();
+            Statement statement = connectDB.createStatement();
+            // Перевірка унікальності username
+            ResultSet usernameCollision = statement.executeQuery(
+                            "SELECT * " +
+                            "FROM login_table " +
+                            "WHERE username = '" + username_gen + "'");
+            if(usernameCollision.next()){
+                username_gen += random.nextInt(5000);
+            }else{
+                userNameField.setStyle(null);
+            }
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+        userNameField.setText(username_gen);
+    }
+
+    public static String transliterateUkrainianToEnglish(String input) {
+        StringBuilder transliterated = new StringBuilder();
+
+        String[][] ukrainianToEnglish = {
+                {"а", "a"}, {"б", "b"}, {"в", "v"}, {"г", "h"}, {"д", "d"},
+                {"е", "e"}, {"є", "ye"}, {"ж", "zh"}, {"з", "z"}, {"и", "y"},
+                {"і", "i"}, {"ї", "yi"}, {"й", "y"}, {"к", "k"}, {"л", "l"},
+                {"м", "m"}, {"н", "n"}, {"о", "o"}, {"п", "p"}, {"р", "r"},
+                {"с", "s"}, {"т", "t"}, {"у", "u"}, {"ф", "f"}, {"х", "kh"},
+                {"ц", "ts"}, {"ч", "ch"}, {"ш", "sh"}, {"щ", "shch"}, {"ь", ""},
+                {"ю", "yu"}, {"я", "ya"}
+        };
+
+        for (int i = 0; i < input.length(); i++) {
+            char currentChar = input.charAt(i);
+            String currentLetter = Character.toString(currentChar);
+
+            for (String[] pair : ukrainianToEnglish) {
+                if (pair[0].equals(currentLetter)) {
+                    transliterated.append(pair[1]);
+                    break;
+                }
+            }
+            if (transliterated.length() <= i) {
+                transliterated.append(currentChar);
+            }
+        }
+        return transliterated.toString();
     }
 
     @FXML
@@ -253,7 +342,7 @@ public class RegistrationController implements Initializable {
         String password = hashPassword(passportField.getText());
 
         try {
-            String id_gen = generateRandomId(10);
+            String id_gen = generateRandomId(10, false);
 
             // 1.1. Додавати нові дані про працівників
             String insertUserQuery = "INSERT INTO employee (id_employee, empl_surname, empl_name, empl_patronymic, empl_role, salary, " +
@@ -295,125 +384,22 @@ public class RegistrationController implements Initializable {
         }
     }
 
-    private void clearDatabase() {
-        DatabaseConnection connection = new DatabaseConnection();
-        Connection connectDB = connection.getConnection();
-
-        try {
-            String clearDatabaseLogin = "DELETE FROM login_table";
-            String clearDatabaseQuery = "DELETE FROM employee";
-
-            Statement statement = connectDB.createStatement();
-            statement.executeUpdate(clearDatabaseLogin);
-            statement.executeUpdate(clearDatabaseQuery);
-
-        } catch (SQLException error) {
-            error.printStackTrace();
-        } finally {
-            try {
-                connectDB.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final String CHARACTERS_ON = "0123456789";
     private static final SecureRandom random = new SecureRandom();
-    public static String generateRandomId(int length) {
+    public static String generateRandomId(int length, boolean onlyNums) {
         StringBuilder idBuilder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(CHARACTERS.length());
-            char randomChar = CHARACTERS.charAt(randomIndex);
+            int randomIndex; char randomChar;
+            if (onlyNums == false) {
+                randomIndex = random.nextInt(CHARACTERS.length());
+                randomChar = CHARACTERS.charAt(randomIndex);
+            } else {
+                randomIndex = random.nextInt(CHARACTERS_ON.length());
+                randomChar = CHARACTERS_ON.charAt(randomIndex);
+            }
             idBuilder.append(randomChar);
         }
         return idBuilder.toString();
-    }
-
-
-    // -----------------------------------------------------------------------------------------------------------------
-    public void fillDataBase(){
-        String[] lastNames = {"Петренко", "Іваненко", "Коваленко", "Сидоренко", "Мельник", "Ковальчук", "Павленко",
-                "Кравченко", "Шевченко", "Бойко", "Кузьменко", "Шевчук", "Савченко", "Мороз", "Бондаренко", "Ткаченко",
-                "Кучеренко", "Захаренко", "Коваленко", "Романенко"};
-        String[] firstNames = {"Олександр", "Іван", "Софія", "Марія", "Максим", "Анна", "Віктор", "Ольга", "Артем", "Юлія",
-                "Василь", "Катерина", "Дмитро", "Тетяна", "Анастасія", "Петро", "Христина", "Сергій", "Наталія", "Андрій"};
-        String[] middleNames = {"Олександрович", "Іванович", "Володимирівна", "Петрівна", "Миколайович", "Андріївна",
-                "Сергійович", "Ярославівна", "Артемович", "Дмитрівна", "Васильович", "Віталіївна", "Ігорович",
-                "Олегівна", "Владиславівна", "Романович", "Тарасівна", "Богданович", "Григоріївна", "Максимович"};
-        String[] roles = {"Менеджер", "Касир"};
-        double[] salaries = {8000.0, 8200.0, 8500.0, 8700.0, 9000.0, 9200.0, 9400.0, 9600.0, 9800.0, 10000.0, 6000.0, 6200.0, 6400.0, 6600.0, 6800.0, 7000.0, 7200.0, 7400.0, 7600.0, 7800.0};
-        LocalDate[] birthDates = {
-                LocalDate.of(1990, 5, 15), LocalDate.of(1985, 8, 25), LocalDate.of(1987, 12, 10), LocalDate.of(1992, 3, 6),
-                LocalDate.of(1988, 9, 18), LocalDate.of(1995, 2, 3), LocalDate.of(1983, 7, 22), LocalDate.of(1997, 11, 14),
-                LocalDate.of(1991, 4, 30), LocalDate.of(1986, 10, 8), LocalDate.of(1993, 6, 12), LocalDate.of(1989, 1, 28),
-                LocalDate.of(1994, 5, 7), LocalDate.of(1984, 11, 20), LocalDate.of(1999, 8, 2), LocalDate.of(1982, 12, 17),
-                LocalDate.of(1996, 3, 25), LocalDate.of(1980, 6, 5), LocalDate.of(1981, 9, 9), LocalDate.of(1998, 1, 1)
-        };
-        LocalDate[] firstWorkDays = {
-                LocalDate.of(2010, 9, 20), LocalDate.of(2012, 7, 14), LocalDate.of(2008, 11, 30), LocalDate.of(2015, 4, 5),
-                LocalDate.of(2007, 3, 12), LocalDate.of(2018, 5, 28), LocalDate.of(2004, 10, 3), LocalDate.of(2017, 9, 16),
-                LocalDate.of(2009, 8, 8), LocalDate.of(2013, 8, 21), LocalDate.of(2017, 6, 19), LocalDate.of(2016, 12, 10),
-                LocalDate.of(2023, 1, 22), LocalDate.of(2019, 11, 7), LocalDate.of(2023, 7, 2), LocalDate.of(2014, 10, 14),
-                LocalDate.of(2022, 4, 18), LocalDate.of(2020, 2, 29), LocalDate.of(2001, 9, 4), LocalDate.of(2021, 3, 8)
-        };
-        String[] phoneNumbers = {
-                "+380661234567", "+380990123456", "+380951234567", "+380981234567", "+380664567890", "+380997654321",
-                "+380955432109", "+380986543210", "+380669876543", "+380992345678", "+380954321098", "+380983456789",
-                "+380667890123", "+380998765432", "+380958765432", "+380987654321", "+380662345678", "+380994567890",
-                "+380953210987", "+380982109876"
-        };
-        String[] cities = {
-                "Київ", "Харків", "Одеса", "Дніпро", "Львів", "Запоріжжя", "Кривий Ріг", "Миколаїв", "Вінниця", "Херсон",
-                "Полтава", "Чернігів", "Черкаси", "Житомир", "Суми", "Івано-Франківськ", "Тернопіль", "Кропивницький",
-                "Ужгород", "Маріуполь"
-        };
-        String[] streets = {
-                "Вулиця Шевченка", "Проспект Незалежності", "Вулиця Лесі Українки", "Вулиця Воздвиженська", "Вулиця Тараса Шевченка",
-                "Вулиця Івана Франка", "Проспект Гагаріна", "Вулиця Миру", "Проспект Коцюбинського", "Вулиця Арнаутська",
-                "Вулиця Героїв Крут", "Вулиця Джеймса Мейса", "Вулиця Степана Бандери", "Вулиця Юрія Вороного", "Вулиця Київська",
-                "Вулиця Незалежності", "Вулиця Гетьмана Мазепи", "Вулиця Вокзальна", "Вулиця Івана Франка", "Вулиця М. Грушевського"
-        };
-        String[] zipCodes = {
-                "01001", "02000", "03000", "04000", "05000", "06000", "07000", "08000", "09000", "10000", "11000", "12000",
-                "13000", "14000", "15000", "16000", "17000", "18000", "19000", "20000"
-        };
-        String[] usernames = {
-                "oleksandr_petrenko", "ivan_ivanenko", "sofiia_kovalenko", "maria_sydorenko", "maxym_melnyk", "anna_kovalchuk",
-                "viktor_pavlenko", "olha_kravchenko", "artem_shevchenko", "yuliia_boiko", "vasyl_kuzmenko", "kateryna_shevchuk",
-                "dmytro_savchenko", "tetiana_moroz", "anastasiia_bondarenko", "petro_tkachenko", "hryhorii_kucherenko",
-                "nataliia_zakharenko", "andrii_kovalenko", "serhii_romanenko"
-        };
-        String[] passwords = {
-                "qwerty123", "password123", "123456789", "letmein", "welcome123", "abc123", "123456", "password1", "passw0rd",
-                "admin123", "qwertyuiop", "iloveyou", "football", "1234567", "123123", "111111", "12345678", "qwerty",
-                "password", "1234"
-        };
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-
-            for (int i = 0; i < lastNames.length; i++) {
-                String id_gen = generateRandomId(10);
-                int randomRole = random.nextInt(roles.length);
-
-                String insertQuery = "INSERT INTO employee (id_employee, empl_surname, empl_name, empl_patronymic, empl_role, salary, date_of_birth, date_of_start, phone_number, city, street, zip_code) " +
-                        "VALUES ('" + id_gen + "', '" + lastNames[i] + "', '" + firstNames[i] + "', '" + middleNames[i] + "', '" + roles[randomRole] + "', " + salaries[i] + ", '" +
-                        birthDates[i] + "', '" + firstWorkDays[i] + "', '" + phoneNumbers[i] + "', '" + cities[i] + "', '" + streets[i] + "', '" + zipCodes[i] + "')";
-
-
-                String insertLoginInfo = "INSERT INTO login_table (username, password, id_employee) " +
-                        "VALUES ('" + usernames[i] + "', '" + hashPassword(passwords[i]) + "', '" + id_gen + "')";
-
-                statement.executeUpdate(insertQuery);
-                statement.executeUpdate(insertLoginInfo);
-            }
-
-            statement.close();
-            connectDB.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -8,6 +8,7 @@ import org.example.db_zlagoda.utils.tableview_tools.ClientItem;
 import org.example.db_zlagoda.utils.tableview_tools.ProductItem;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -42,30 +43,59 @@ public class DatabaseManager {
     }
 
     public static ObservableList<ClientItem> getClientTableItems() {
-        ObservableList<ClientItem> list = FXCollections.observableArrayList(
-                new ClientItem("928765287617", "12312", "82", "true", 0.5),
-                new ClientItem("928765287617", "produ123123ct2", "82", "true", 0.5),
-                new ClientItem("928765287617", "asdasd", "82", "true", 0.5),
-                new ClientItem("928765287617", "asdadsda", "82", "true", 0.5),
-                new ClientItem("928765287617", "zczxvc", "82", "true", 0.5),
-                new ClientItem("827491826572", "xcvxcvxcv", "1", "true", 0.5),
-                new ClientItem("827491826572", "kljdfgkldfjg", "23", "true", 0.5),
-                new ClientItem("827491826572", "fjdslkmfskl", "76", "true", 0.5),
-                new ClientItem("827491826572", "sjfklfnsd", "1012", "true", 0.5),
-                new ClientItem("827491826572", "vnxcm,vxn", "51", "true", 0.5),
-                new ClientItem("729152817298", "jfaskljdsak", "2938", "true", 0.5),
-                new ClientItem("729152817298", "asdjklas", "200", "true", 0.5),
-                new ClientItem("729152817298", "vncxm,nvmx,c", "31", "true", 0.5),
-                new ClientItem("729152817298", "l;akd;ls", "81", "true", 0.5),
-                new ClientItem("729152817298", "akjsbdasbd", "2003", "true", 0.5)
-        );
-        ObservableList<ClientItem> list2 = FXCollections.observableArrayList();
-        list2.addAll(list);
-        list2.addAll(list);
-        list2.addAll(list);
-        list2.addAll(list);
+//        ObservableList<ClientItem> list = FXCollections.observableArrayList(
+//                new ClientItem("928765287617", "12312", "82", "true", 0.5),
+//                new ClientItem("928765287617", "produ123123ct2", "82", "true", 0.5),
+//                new ClientItem("928765287617", "asdasd", "82", "true", 0.5),
+//                new ClientItem("928765287617", "asdadsda", "82", "true", 0.5),
+//                new ClientItem("928765287617", "zczxvc", "82", "true", 0.5),
+//                new ClientItem("827491826572", "xcvxcvxcv", "1", "true", 0.5),
+//                new ClientItem("827491826572", "kljdfgkldfjg", "23", "true", 0.5),
+//                new ClientItem("827491826572", "fjdslkmfskl", "76", "true", 0.5),
+//                new ClientItem("827491826572", "sjfklfnsd", "1012", "true", 0.5),
+//                new ClientItem("827491826572", "vnxcm,vxn", "51", "true", 0.5),
+//                new ClientItem("729152817298", "jfaskljdsak", "2938", "true", 0.5),
+//                new ClientItem("729152817298", "asdjklas", "200", "true", 0.5),
+//                new ClientItem("729152817298", "vncxm,nvmx,c", "31", "true", 0.5),
+//                new ClientItem("729152817298", "l;akd;ls", "81", "true", 0.5),
+//                new ClientItem("729152817298", "akjsbdasbd", "2003", "true", 0.5)
+//        );
+//        ObservableList<ClientItem> list2 = FXCollections.observableArrayList();
+//        list2.addAll(list);
+//        list2.addAll(list);
+//        list2.addAll(list);
+//        list2.addAll(list);
+//
+//        return list2;
+        ObservableList<ClientItem> clientItems = FXCollections.observableArrayList();
+        try {
+            DatabaseConnection connection = new DatabaseConnection();
+            Connection connectDB = connection.getConnection();
+            Statement statement = connectDB.createStatement();
+            ResultSet customers_information = null;
 
-        return list2;
+            // 3. Отримати інформацію про усіх постійних клієнтів, відсортованих за прізвищем;
+            customers_information = statement.executeQuery(
+                    "SELECT * " +
+                            "FROM customer_card " +
+                            "ORDER BY cust_surname");
+
+            while (customers_information.next()) {
+                String id = customers_information.getString("card_number");
+                String name = customers_information.getString("cust_surname") + " " + customers_information.getString("cust_name") + " " + customers_information.getString("cust_patronymic");
+                String phoneNum = customers_information.getString("phone_number");
+                String address = "м. " + customers_information.getString("city") + ", вул. " + customers_information.getString("street") + ", поштовий індекс : " + customers_information.getString("zip_code");
+                double percent = customers_information.getDouble("percent");
+                clientItems.add(new ClientItem(id, name, phoneNum, address, percent));
+            }
+
+            customers_information.close();
+            statement.close();
+            connectDB.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return clientItems;
     }
 
     public static void addReceiptToDB(Receipt receipt) throws SQLException {

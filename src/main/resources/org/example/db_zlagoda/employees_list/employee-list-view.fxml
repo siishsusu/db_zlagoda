@@ -5,9 +5,9 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="616.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.employees_list.EmployeesListController">
+<AnchorPane prefHeight="616.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.employees_list.EmployeesListController">
    <children>
-      <TableView fx:id="employeesTable" layoutX="24.0" layoutY="25.0" prefHeight="491.0" prefWidth="900.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
+      <TableView fx:id="employeesTable" layoutX="58.4" layoutY="55.0" prefHeight="462.0" prefWidth="898.0" AnchorPane.leftAnchor="51.0" AnchorPane.rightAnchor="51.0" AnchorPane.topAnchor="50.0">
         <columns>
           <TableColumn fx:id="idColumn" prefWidth="75.0" text="id" />
           <TableColumn fx:id="surnameColumn" prefWidth="75.0" text="Прізвище" />
@@ -26,6 +26,8 @@
       <Button fx:id="updateButton" layoutX="367.0" layoutY="524.0" mnemonicParsing="false" onAction="#updateButtonOnAction" text="Оновити інформацію про працівника" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="680.0" />
       <Button fx:id="deleteButton" layoutX="665.0" layoutY="524.0" mnemonicParsing="false" onAction="#deleteButtonOnAction" text="Видалити інформацію про працівника" AnchorPane.rightAnchor="50.0" />
       <Button fx:id="addButton" layoutX="373.0" layoutY="524.0" mnemonicParsing="false" onAction="#addButtonOnAction" text="Додати інформацію про працівника" AnchorPane.leftAnchor="360.0" AnchorPane.rightAnchor="360.0" />
-      <Button fx:id="findButton" layoutX="372.0" layoutY="571.0" mnemonicParsing="false" onAction="#findAddressAndPhoneButtonOnAction" text="Знайти адресу і телефон працівника" AnchorPane.leftAnchor="360.0" AnchorPane.rightAnchor="360.0" />
+      <Button fx:id="findButton" layoutX="372.0" layoutY="571.0" mnemonicParsing="false" onAction="#findAddressAndPhoneButtonOnAction" text="Знайти адресу і телефон працівника" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="360.0" AnchorPane.rightAnchor="360.0" />
+      <Button fx:id="allEmployeesButton" layoutX="208.0" layoutY="14.0" mnemonicParsing="false" onAction="#allEmployeesButtonOnAction" prefWidth="270.0" text="Всі працівники" AnchorPane.leftAnchor="150.0" AnchorPane.topAnchor="20.0" />
+      <Button fx:id="cashiersButton" layoutX="574.0" layoutY="20.0" mnemonicParsing="false" onAction="#cashiersButtonOnAction" prefWidth="270.0" text="Касири" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="20.0" />
    </children>
 </AnchorPane>

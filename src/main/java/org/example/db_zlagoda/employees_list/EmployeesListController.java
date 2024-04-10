@@ -24,6 +24,8 @@ import java.util.ResourceBundle;
 
 public class EmployeesListController implements Initializable {
 
+    private int SCREEN = 0;
+
     @FXML
     private TableView<Object[]> employeesTable;
 
@@ -64,13 +66,7 @@ public class EmployeesListController implements Initializable {
     private TableColumn<Object[], String> zipColumn;
 
     @FXML
-    private Button updateButton;
-
-    @FXML
-    private Button deleteButton;
-
-    @FXML
-    private Button addButton;
+    private Button updateButton, deleteButton, cashiersButton, allEmployeesButton, addButton;
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         idColumn.setCellValueFactory(cellData -> cellData.getValue()[0] != null ? new SimpleStringProperty(cellData.getValue()[0].toString()) : null);
@@ -108,13 +104,21 @@ public class EmployeesListController implements Initializable {
             DatabaseConnection connection = new DatabaseConnection();
             Connection connectDB = connection.getConnection();
             Statement statement = connectDB.createStatement();
-            // 5. Отримати інформацію про усіх працівників, відсортованих за прізвищем;
-            // 6. Отримати інформацію про усіх працівників, що займають посаду касира, відсортованих за прізвищем;
-            ResultSet employees_information = statement.executeQuery(
-                    "SELECT * " +
-                    "FROM employee " +
-//                     "WHERE empl_role = 'Касир'" + // якщо потрібна інформація тільки про касирів
-                    "ORDER BY empl_surname");
+            ResultSet employees_information = null;
+            if(SCREEN == 0){
+                // 5. Отримати інформацію про усіх працівників, відсортованих за прізвищем;
+                employees_information = statement.executeQuery(
+                            "SELECT * " +
+                                "FROM employee " +
+                                "ORDER BY empl_surname");
+            }else if(SCREEN == 1){
+                // 6. Отримати інформацію про усіх працівників, що займають посаду касира, відсортованих за прізвищем;
+                employees_information = statement.executeQuery(
+                            "SELECT * " +
+                                "FROM employee " +
+                                "WHERE empl_role = 'Касир'" +
+                                "ORDER BY empl_surname");
+            }
 
             while (employees_information.next()) {
                 Object[] rowData = {
@@ -140,6 +144,20 @@ public class EmployeesListController implements Initializable {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    public void cashiersButtonOnAction(ActionEvent event) throws IOException {
+        SCREEN = 1;
+        clearTable();
+        loadEmployeesData();
+    }
+
+    @FXML
+    public void allEmployeesButtonOnAction(ActionEvent event) throws IOException {
+        SCREEN = 0;
+        clearTable();
+        loadEmployeesData();
     }
 
     @FXML
