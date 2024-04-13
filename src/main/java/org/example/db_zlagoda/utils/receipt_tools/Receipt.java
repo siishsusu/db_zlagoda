@@ -1,5 +1,6 @@
 package org.example.db_zlagoda.utils.receipt_tools;
 
+import javafx.collections.ObservableList;
 import org.example.db_zlagoda.utils.tableview_tools.ProductItem;
 
 import java.util.Date;
@@ -9,12 +10,12 @@ public class Receipt {
     private double sum = 0;
     private double vat = 0;
 
-    public Receipt(Date date, ProductItem[] products) {
+    public Receipt(Date date, ObservableList<ProductItem> products) {
         this.date = date;
         initPriceFields(products);
     }
 
-    private void initPriceFields(ProductItem[] products) {
+    private void initPriceFields(ObservableList<ProductItem> products) {
         for(ProductItem product : products) {
             sum += product.getPrice();
         }

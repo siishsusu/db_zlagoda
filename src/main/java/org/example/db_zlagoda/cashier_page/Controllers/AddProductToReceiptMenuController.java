@@ -14,27 +14,27 @@ import org.example.db_zlagoda.cashier_page.Views.CashierMenuView;
 import org.example.db_zlagoda.utils.tableview_tools.ProductItem;
 import org.example.db_zlagoda.utils.tableview_tools.TableViewLoader;
 
-import java.util.Arrays;
-
 public class AddProductToReceiptMenuController {
     public Button selectAmountButton;
     private Stage stage;
     public TableView productsTable;
     public HBox viewContainer;
-    public TableColumn product_utc;
+    public TableColumn product_upc;
     public TableColumn product_name;
     public TableColumn product_amount;
     public TableColumn product_price;
-    private EventHandler<ActionEvent> okButtonHandler, cancelButtonHandler;
     private int amountSelected = 1;
     private ProductItem productSelected;
 
     public void initialize() {
-        TableViewLoader.initProductsTable(productsTable, product_utc, product_name, product_amount, product_price);
+        TableViewLoader.initProductsTable(productsTable, product_upc, product_name, product_amount, product_price);
+        productsTable.setItems(CashierMenuView.controller.data.getProducts());
         selectAmountButton.setDisable(true);
         productsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 selectAmountButton.setDisable(false);
+            } else {
+                selectAmountButton.setDisable(true);
             }
         });
     }
@@ -101,16 +101,17 @@ public class AddProductToReceiptMenuController {
                 okButton.setDisable(true);
             }
         });
-        okButton.setOnAction(x -> {
-            promptStage.close();
-            stage.close();
-            viewContainer.setDisable(false);
-            CashierMenuView.controller.addReceiptProduct(productSelected, amountSelected);
-        });
+
 
         cancelButton.setOnAction(x -> {
             promptStage.close();
             viewContainer.setDisable(false);
+        });
+
+        okButton.setOnAction(x -> {
+            cancelButton.fire();
+            addProductToReceipt();
+            stage.close();
         });
     }
 
@@ -121,6 +122,10 @@ public class AddProductToReceiptMenuController {
             throw new Exception();
         }
         return result;
+    }
+
+    private void addProductToReceipt() {
+        CashierMenuView.controller.addReceiptProduct(productSelected, amountSelected);
     }
 
 

@@ -6,13 +6,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import org.example.db_zlagoda.db_data.DatabaseManager;
 
 public class TableViewLoader {
-    public static void initProductsTable(TableView table, TableColumn utc,
+    public static void initProductsTable(TableView table, TableColumn upc,
                                          TableColumn name, TableColumn amount, TableColumn price) {
-        utc.setCellValueFactory(new PropertyValueFactory<ProductItem, String>("utc"));
+        upc.setCellValueFactory(new PropertyValueFactory<ProductItem, String>("upc"));
         name.setCellValueFactory(new PropertyValueFactory<ProductItem, String>("name"));
         amount.setCellValueFactory(new PropertyValueFactory<ProductItem, Integer>("amount"));
         price.setCellValueFactory(new PropertyValueFactory<ProductItem, Double>("price"));
-        table.setItems(DatabaseManager.getProductTableItems());
     }
 
     public static void initClientsTable(TableView table, TableColumn id,
@@ -23,15 +22,5 @@ public class TableViewLoader {
         phone.setCellValueFactory(new PropertyValueFactory<ClientItem, String>("phone"));
         address.setCellValueFactory(new PropertyValueFactory<ClientItem, String>("address"));
         discount.setCellValueFactory(new PropertyValueFactory<ClientItem, Double>("discount"));
-        table.setItems(DatabaseManager.getClientTableItems());
-    }
-
-    public static void initReceiptTable(TableView table, TableColumn utc,
-                                        TableColumn name, TableColumn amount, TableColumn price) {
-        utc.setCellValueFactory(new PropertyValueFactory<ProductItem, String>("utc"));
-        name.setCellValueFactory(new PropertyValueFactory<ProductItem, String>("name"));
-        amount.setCellValueFactory(new PropertyValueFactory<ProductItem, Integer>("amount"));
-        price.setCellValueFactory(new PropertyValueFactory<ProductItem, Double>("price"));
-
     }
 }

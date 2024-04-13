@@ -1,13 +1,13 @@
 package org.example.db_zlagoda.utils.tableview_tools;
 
-public class ProductItem {
+public class ProductItem{
 
     private String name;
     private int amount;
-    private String utc;
+    private String upc;
     private double price;
     public ProductItem(String utc, String name, int amount, double price) {
-        this.utc = utc;
+        this.upc = utc;
         this.name = name;
         this.amount = amount;
         this.price = price;
@@ -21,8 +21,8 @@ public class ProductItem {
         return name;
     }
 
-    public String getUtc() {
-        return utc;
+    public String getUpc() {
+        return upc;
     }
 
     public double getPrice() {
@@ -41,7 +41,15 @@ public class ProductItem {
         this.name = name;
     }
 
-    public void setUtc(String utc) {
-        this.utc = utc;
+    public void setUpc(String utc) {
+        this.upc = utc;
+    }
+
+    @Override
+    public boolean equals(Object other){
+        if (other == null) return false;
+        if (other == this) return true;
+        if (!(other instanceof ProductItem otherPI)) return false;
+        return this.upc.equals(otherPI.upc);
     }
 }

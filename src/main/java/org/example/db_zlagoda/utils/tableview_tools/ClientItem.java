@@ -52,4 +52,12 @@ public class ClientItem {
     public void setPhone(String phone) {
         this.phone = phone;
     }
+
+    @Override
+    public boolean equals(Object other){
+        if (other == null) return false;
+        if (other == this) return true;
+        if (!(other instanceof ClientItem otherCI)) return false;
+        return this.card_id.equals(otherCI.card_id);
+    }
 }

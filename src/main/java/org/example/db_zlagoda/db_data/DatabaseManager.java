@@ -11,35 +11,29 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 
 public class DatabaseManager {
     //TODO: implement actual data selection from database
 
     public static ObservableList<ProductItem> getProductTableItems() {
-        ObservableList<ProductItem> list = FXCollections.observableArrayList(
-                new ProductItem("928765287617", "product2", 82, 200),
+        return FXCollections.observableArrayList(
+                new ProductItem("918765287617", "product2", 82, 200),
                 new ProductItem("928765287617", "product1", 82, 123),
-                new ProductItem("928765287617", "product3", 82, 543),
-                new ProductItem("928765287617", "product4", 82, 12),
-                new ProductItem("928765287617", "product5", 82, 2),
-                new ProductItem("827491826572", "product6", 1, 543),
+                new ProductItem("938765287617", "product3", 82, 543),
+                new ProductItem("948765287617", "product4", 82, 12),
+                new ProductItem("958765287617", "product5", 82, 2),
+                new ProductItem("817491826572", "product6", 1, 543),
                 new ProductItem("827491826572", "product7", 23, 1235),
-                new ProductItem("827491826572", "product8", 76, 43),
-                new ProductItem("827491826572", "product9", 1012, 23),
-                new ProductItem("827491826572", "product10", 51, 543),
-                new ProductItem("729152817298", "product11", 2938, 123),
+                new ProductItem("837491826572", "product8", 76, 43),
+                new ProductItem("847491826572", "product9", 1012, 23),
+                new ProductItem("857491826572", "product10", 51, 543),
+                new ProductItem("719152817298", "product11", 2938, 123),
                 new ProductItem("729152817298", "product12", 200, 32),
-                new ProductItem("729152817298", "product13", 31, 16),
-                new ProductItem("729152817298", "product14", 81, 75),
-                new ProductItem("729152817298", "product15", 2003, 3)
+                new ProductItem("739152817298", "product13", 31, 16),
+                new ProductItem("749152817298", "product14", 81, 75),
+                new ProductItem("759152817298", "product15", 2003, 3)
         );
-        ObservableList<ProductItem> list2 = FXCollections.observableArrayList();
-        list2.addAll(list);
-        list2.addAll(list);
-        list2.addAll(list);
-        list2.addAll(list);
-
-        return list2;
     }
 
     public static ObservableList<ClientItem> getClientTableItems() {
@@ -102,5 +96,19 @@ public class DatabaseManager {
         DatabaseConnection connection = new DatabaseConnection();
         Connection connectDB = connection.getConnection();
         Statement statement = connectDB.createStatement();
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        String updateQuery = "INSERT INTO receipt(print_date, sum_total, vat)" +
+                "VALUES ('"
+                + formatter.format(receipt.getDate()) + "',"
+                + receipt.getSum() + ","
+                + receipt.getVat()
+                + ");";
+
+        statement.executeUpdate(updateQuery);
+
+        statement.close();
+        connectDB.close();
     }
 }

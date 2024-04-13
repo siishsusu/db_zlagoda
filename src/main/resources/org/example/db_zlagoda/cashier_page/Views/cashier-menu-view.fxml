@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox fx:id="cashierMenuContainer" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.cashier_page.Controllers.CashierMenuViewController">
+<HBox fx:id="cashierMenuContainer" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.cashier_page.Controllers.CashierMenuViewController">
     <VBox maxWidth="200.0" minWidth="200" spacing="20.0">
         <padding>
             <Insets bottom="5.0" left="10.0" right="10.0" top="10.0" />
@@ -30,7 +30,6 @@
         <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
         </padding>
-        <Label text="Створення чеку" />
         <VBox prefWidth="900">
             <children>
                 <HBox alignment="CENTER_LEFT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="900.0" spacing="5.0">
@@ -38,18 +37,19 @@
                         <Insets bottom="5.0" top="5.0" />
                     </padding>
                     <children>
-                        <Button mnemonicParsing="false" text="Очистити" />
-                        <Button mnemonicParsing="false" onAction="#removeSelectedProduct" text="Видалити товар" />
-                        <Button mnemonicParsing="false" onAction="#openAddProductMenu" text="Додати товар" />
-                        <Label alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Чек #005832" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" text="Очистити" onAction="#removeAllProducts"/>
+                        <Button fx:id="removeFromReceiptButton" mnemonicParsing="false" text="Видалити товар" onAction="#removeSelectedProduct"/>
+                        <Button mnemonicParsing="false" text="Додати товар" onAction="#openAddProductMenu"/>
+                        <Label alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Створення чеку"
+                               HBox.hgrow="ALWAYS"/>
                     </children>
                 </HBox>
                 <TableView fx:id="receiptTable" nodeOrientation="LEFT_TO_RIGHT" prefHeight="1000">
                     <columns>
-                        <TableColumn fx:id="receipt_utc" text="UTC" />
-                        <TableColumn fx:id="receipt_name" text="Назва" />
-                        <TableColumn fx:id="receipt_amount" text="Кількість" />
-                        <TableColumn fx:id="receipt_price" text="Ціна" />
+                        <TableColumn fx:id="receipt_upc" text="UPC"/>
+                        <TableColumn fx:id="receipt_name" text="Назва"/>
+                        <TableColumn fx:id="receipt_amount" text="Кількість"/>
+                        <TableColumn fx:id="receipt_price" text="Ціна"/>
                     </columns>
                     <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -60,9 +60,10 @@
                         <Insets bottom="5.0" top="5.0" />
                     </padding>
                     <children>
-                        <Button mnemonicParsing="false" text="Видалити" />
-                        <Button mnemonicParsing="false" text="Зберегти" />
-                        <Label alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Сума 1873 грн" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" text="Видалити" onAction="#deleteReceipt"/>
+                        <Button mnemonicParsing="false" text="Зберегти" onAction="#saveReceipt"/>
+                        <Label fx:id="receipt_sum" alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Сума"
+                               HBox.hgrow="ALWAYS"/>
                     </children>
                 </HBox>
             </children>
@@ -87,7 +88,7 @@
                             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                         </columnResizePolicy>
                         <columns>
-                            <TableColumn fx:id="product_utc" text="UTC" />
+                            <TableColumn fx:id="product_upc" text="UPC" />
                             <TableColumn fx:id="product_name" text="Назва" />
                             <TableColumn fx:id="product_amount" text="Кількість" />
                             <TableColumn fx:id="product_price" text="Ціна" />
