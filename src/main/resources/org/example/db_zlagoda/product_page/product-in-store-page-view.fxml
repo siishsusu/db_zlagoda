@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.product_page.productInStore.ProductInStoreController">
+   <content>
+      <AnchorPane prefHeight="800.0" prefWidth="1000.0">
+         <children>
+            <TableView fx:id="productsInStoreTable" layoutX="59.0" layoutY="87.0" prefHeight="462.0" prefWidth="898.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="70.0">
+               <columns>
+                  <TableColumn fx:id="upcColumn" prefWidth="128.0" text="UPC" />
+                  <TableColumn fx:id="upcPromColumn" prefWidth="128.0" text="UPC акційного товару" />
+                  <TableColumn fx:id="prodIDColumn" prefWidth="128.0" text="ID товару" />
+                  <TableColumn fx:id="productNameColumn" prefWidth="128.0" text="Назва товару" />
+                  <TableColumn fx:id="sellingPriceColumn" prefWidth="128.0" text="Ціна" />
+                  <TableColumn fx:id="numOfProdColumn" prefWidth="128.0" text="Кількість товару" />
+                  <TableColumn fx:id="promotionalColumm" prefWidth="128.0" text="Акція" />
+               </columns>
+            </TableView>
+            <HBox alignment="CENTER" layoutX="50.0" layoutY="533.0" prefHeight="50.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.799999999999955">
+               <children>
+                  <Button fx:id="updateButton" mnemonicParsing="false" onAction="#updateButtonOnAction" prefWidth="200.0" text="Оновити інформацію про товар">
+                     <HBox.margin>
+                        <Insets left="20.0" right="20.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteButtonOnAction" prefWidth="200.0" text="Видалити інформацію про товар">
+                     <HBox.margin>
+                        <Insets left="20.0" right="20.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="addButton" mnemonicParsing="false" onAction="#addButtonOnAction" prefWidth="200.0" text="Додати товар">
+                     <HBox.margin>
+                        <Insets left="20.0" right="20.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+            </HBox>
+            <TextField fx:id="UPC_field" layoutX="68.0" layoutY="583.0" prefHeight="26.0" prefWidth="669.0" promptText="Знайти ціну продажу товару, кількість наявних одиниць товару, назву та характеристики товару за UPC" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="580.0" />
+            <TableView fx:id="searchTable" layoutX="50.0" layoutY="614.0" prefHeight="171.0" prefWidth="882.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.799999999999955" AnchorPane.topAnchor="614.0">
+               <columns>
+                  <TableColumn fx:id="nameOfProdCol" prefWidth="225.0" text="Назва товару" />
+                  <TableColumn fx:id="characteristicsOfProdCol" prefWidth="225.0" text="Характеристики" />
+                  <TableColumn fx:id="priceOfProdCol" prefWidth="225.0" text="Ціна продажу" />
+                  <TableColumn fx:id="numOfProdCol" prefWidth="225.0" text="Кількість наявних одиниць" />
+               </columns>
+            </TableView>
+            <Button fx:id="showInfoButton" layoutX="685.0" layoutY="579.0" mnemonicParsing="false" onAction="#showInfoButtonOnAction" prefWidth="200.0" text="Знайти" AnchorPane.leftAnchor="730.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="580.0" />
+            <HBox alignment="CENTER_LEFT" layoutX="50.0" layoutY="19.0" prefHeight="50.0" prefWidth="200.0" AnchorPane.bottomAnchor="730.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="25.0">
+               <children>
+                  <Button fx:id="allProdButton" mnemonicParsing="false" onAction="#allProdButtonOnAction" prefWidth="200.0" text="Всі товари">
+                     <HBox.margin>
+                        <Insets right="40.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="promProdButton" mnemonicParsing="false" onAction="#promProdButtonOnAction" prefWidth="200.0" text="Акційні товари">
+                     <HBox.margin>
+                        <Insets right="40.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="no_promProdButton" mnemonicParsing="false" onAction="#no_promProdButtonOnAction" prefWidth="200.0" text="Неакційні товари">
+                     <HBox.margin>
+                        <Insets right="40.0" />
+                     </HBox.margin>
+                  </Button>
+                  <ComboBox fx:id="sortByBox" prefHeight="26.0" prefWidth="180.0" promptText="Сортувати за" />
+               </children>
+            </HBox>
+            <Button fx:id="printButton" layoutX="955.0" layoutY="286.0" mnemonicParsing="false" onAction="#printButtonOnAction" prefHeight="25.0" prefWidth="30.0" text="🖶" AnchorPane.bottomAnchor="483.6" AnchorPane.rightAnchor="14.600000000000023" AnchorPane.topAnchor="286.0" />
+         </children>
+      </AnchorPane>
+   </content>
+</ScrollPane>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.product_page.category.CategoryPageController">
+   <content>
+      <AnchorPane prefHeight="800.0" prefWidth="1000.0">
+         <children>
+            <TableView fx:id="categoriesTable" layoutX="68.4" layoutY="65.0" prefHeight="462.0" prefWidth="898.0" AnchorPane.bottomAnchor="450.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="0.0">
+               <columns>
+                  <TableColumn fx:id="categoryNumCol" prefWidth="450.0" text="Номер категорії" />
+                  <TableColumn fx:id="categoryNameCol" prefWidth="450.0" text="Назва категорії" />
+               </columns>
+            </TableView>
+            <HBox layoutX="50.0" layoutY="400.0" prefHeight="50.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="350.0">
+               <children>
+                  <Button fx:id="addButton" mnemonicParsing="false" onAction="#addButtonOnAction" prefHeight="26.0" prefWidth="200.0" text="Додати категорію">
+                     <HBox.margin>
+                        <Insets left="20.0" top="10.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="updateButton" layoutX="30.0" layoutY="20.0" mnemonicParsing="false" onAction="#updateButtonOnAction" prefHeight="26.0" prefWidth="200.0" text="Оновити категорію">
+                     <HBox.margin>
+                        <Insets left="20.0" top="10.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="deleteButton" layoutX="250.0" layoutY="20.0" mnemonicParsing="false" onAction="#deleteButtonOnAction" prefHeight="26.0" prefWidth="200.0" text="Видалити категорію">
+                     <HBox.margin>
+                        <Insets left="20.0" top="10.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="printButton" layoutX="570.0" layoutY="20.0" mnemonicParsing="false" onAction="#printButtonOnAction" prefHeight="26.0" prefWidth="200.0" text="Видрукувати звіт">
+                     <HBox.margin>
+                        <Insets left="20.0" top="10.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+               <padding>
+                  <Insets left="50.0" />
+               </padding>
+            </HBox>
+            <BorderPane fx:id="updateAddBlock" layoutX="50.0" layoutY="419.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
+               <center>
+                  <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <VBox layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="250.0">
+                           <HBox.margin>
+                              <Insets left="50.0" right="50.0" />
+                           </HBox.margin>
+                           <children>
+                              <VBox fx:id="updateBox" minWidth="300.0" prefHeight="200.0" prefWidth="500.0">
+                                 <children>
+                                    <Label fx:id="infoLabel" text="Оновлення інформації">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </Label>
+                                    <Label text="Назва категорії">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </Label>
+                                    <TextField fx:id="updateNameField" prefWidth="200.0">
+                                       <VBox.margin>
+                                          <Insets right="20.0" top="2.0" />
+                                       </VBox.margin>
+                                    </TextField>
+                                    <Button fx:id="doUpdateButton" mnemonicParsing="false" onAction="#doUpdateButtonOnAction" prefWidth="200.0" text="Оновити">
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" left="40.0" top="10.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </VBox>
+                           </children>
+                        </VBox>
+                        <VBox layoutX="260.0" layoutY="10.0" prefHeight="200.0" prefWidth="250.0">
+                           <HBox.margin>
+                              <Insets left="50.0" right="50.0" />
+                           </HBox.margin>
+                           <children>
+                              <VBox fx:id="addBox" minWidth="300.0" prefHeight="200.0" prefWidth="500.0">
+                                 <children>
+                                    <Label fx:id="infoLabel1" text="Додавання категорії">
+                                       <font>
+                                          <Font size="25.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </Label>
+                                    <Label text="Назва категорії">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </Label>
+                                    <TextField fx:id="addNameField" prefWidth="200.0">
+                                       <VBox.margin>
+                                          <Insets right="20.0" top="2.0" />
+                                       </VBox.margin>
+                                    </TextField>
+                                    <Button fx:id="doAddButton" mnemonicParsing="false" onAction="#doAddButtonOnAction" prefWidth="200.0" text="Додати">
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" left="40.0" top="10.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </center>
+            </BorderPane>
+         </children>
+      </AnchorPane>
+   </content>
+</ScrollPane>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="containerMain" prefHeight="632.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.customers_list.CustomersListController">
+   <children>
+      <AnchorPane fx:id="table_and_buttons" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="270.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <TableView fx:id="customersTable" layoutX="50.0" layoutY="42.0" prefHeight="462.0" prefWidth="898.0" AnchorPane.bottomAnchor="58.799999999999955" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.80000000000018" AnchorPane.topAnchor="50.0">
+               <columns>
+                  <TableColumn fx:id="idColumn" prefWidth="100.0" text="id" />
+                  <TableColumn fx:id="PIBColumn" prefWidth="300.0" text="ПІБ" />
+                  <TableColumn fx:id="phoneColumn" prefWidth="250.0" text="Номер телефону" />
+                  <TableColumn fx:id="addressColumn" prefWidth="300.0" text="Адреса" />
+                  <TableColumn fx:id="percentColumn" prefWidth="150.0" text="Відсоток" />
+               </columns>
+            </TableView>
+            <Button fx:id="updateButton" mnemonicParsing="false" onAction="#updateButtonOnAction" prefHeight="26.0" prefWidth="270.0" text="Оновити дані про клієнта" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="50.0" />
+            <Button fx:id="addButton" mnemonicParsing="false" onAction="#addButtonOnAction" prefHeight="26.0" prefWidth="270.0" text="Додати дані про клієнта" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="360.0" AnchorPane.rightAnchor="360.0" />
+            <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteButtonOnAction" prefHeight="26.0" prefWidth="270.0" text="Видалити дані про клієнта" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="50.0" />
+            <TextField fx:id="searchPercentField" layoutX="129.0" layoutY="14.0" prefHeight="26.0" prefWidth="598.0" promptText="Введіть відсоток для пошуку клієнтів" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="410.0" />
+            <Button fx:id="searchButton" layoutX="852.0" layoutY="14.0" mnemonicParsing="false" onAction="#searchButtonButtonButtonOnAction" prefHeight="25.0" prefWidth="200.0" text="Знайти" AnchorPane.rightAnchor="200.0" />
+            <Button fx:id="clearFieldButton" layoutX="778.0" layoutY="14.0" mnemonicParsing="false" onAction="#clearFieldButtonButtonOnAction" prefHeight="25.0" prefWidth="10.0" text="X" AnchorPane.rightAnchor="405.0" />
+            <Button fx:id="printButton" layoutX="1117.0" layoutY="14.0" mnemonicParsing="false" onAction="#printButtonOnAction" prefHeight="25.0" prefWidth="30.0" text="🖶" AnchorPane.rightAnchor="50.0" />
+            <Button fx:id="printThisCustomerButton" layoutX="1160.0" layoutY="265.0" mnemonicParsing="false" onAction="#printThisCustomerButtonOnAction" prefHeight="30.0" prefWidth="30.0" text="🖶" AnchorPane.bottomAnchor="270.0" AnchorPane.rightAnchor="9.0" AnchorPane.topAnchor="270.0" />
+         </children>
+      </AnchorPane>
+      <BorderPane fx:id="updateAddBlock" layoutX="50.0" layoutY="577.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="570.0">
+         <top>
+            <Label fx:id="infoLabel" text="Оновлення інформації" BorderPane.alignment="CENTER">
+               <font>
+                  <Font size="25.0" />
+               </font>
+            </Label>
+         </top>
+         <center>
+            <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <VBox prefHeight="200.0" prefWidth="250.0">
+                     <children>
+                        <Label text="Прізвище">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </Label>
+                        <TextField fx:id="surnameField" prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" top="2.0" />
+                           </VBox.margin>
+                        </TextField>
+                        <Label text="Ім'я">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </Label>
+                        <TextField fx:id="nameField" prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" top="2.0" />
+                           </VBox.margin>
+                        </TextField>
+                        <Label layoutX="20.0" layoutY="56.0" text="По-батькові">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </Label>
+                        <TextField fx:id="patronymicField" layoutX="20.0" layoutY="76.0" prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" top="2.0" />
+                           </VBox.margin>
+                        </TextField>
+                     </children>
+                     <HBox.margin>
+                        <Insets left="50.0" right="50.0" />
+                     </HBox.margin>
+                  </VBox>
+                  <VBox layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="250.0">
+                     <children>
+                        <Label text="Номер телефону">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets left="10.0" />
+                           </VBox.margin>
+                        </Label>
+                        <TextField fx:id="phoneField" prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
+                           </VBox.margin>
+                        </TextField>
+                        <Label text="Місто">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets left="10.0" />
+                           </VBox.margin>
+                        </Label>
+                        <TextField fx:id="cityField" prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
+                           </VBox.margin>
+                        </TextField>
+                        <Label layoutX="20.0" layoutY="56.0" text="Вулиця">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets left="10.0" />
+                           </VBox.margin>
+                        </Label>
+                        <TextField fx:id="streetField" layoutX="20.0" layoutY="76.0" prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
+                           </VBox.margin>
+                        </TextField>
+                     </children>
+                     <HBox.margin>
+                        <Insets left="50.0" right="50.0" />
+                     </HBox.margin>
+                  </VBox>
+                  <VBox layoutX="260.0" layoutY="10.0" prefHeight="200.0" prefWidth="250.0">
+                     <children>
+                        <Label text="Поштовий індекс">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets left="10.0" />
+                           </VBox.margin>
+                        </Label>
+                        <TextField fx:id="zipCodeField" prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
+                           </VBox.margin>
+                        </TextField>
+                        <Label text="Відсоток">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets left="10.0" />
+                           </VBox.margin>
+                        </Label>
+                        <TextField fx:id="percentField" prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
+                           </VBox.margin>
+                        </TextField>
+                        <Button fx:id="doUpdateButton" mnemonicParsing="false" prefWidth="200.0" text="Оновити">
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="20.0" />
+                           </VBox.margin>
+                        </Button>
+                     </children>
+                     <HBox.margin>
+                        <Insets left="50.0" right="50.0" />
+                     </HBox.margin>
+                  </VBox>
+               </children>
+            </HBox>
+         </center>
+      </BorderPane>
+   </children>
+</AnchorPane>

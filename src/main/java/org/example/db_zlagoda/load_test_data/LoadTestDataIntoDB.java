@@ -10,17 +10,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 
-import static org.example.db_zlagoda.login_page.RegistrationController.generateRandomId;
-import static org.example.db_zlagoda.login_page.RegistrationController.hashPassword;
+import static org.example.db_zlagoda.login_page.RegistrationController.*;
 
 public class LoadTestDataIntoDB {
 
     public void main(String[] args) {
-//        clearDatabase("product");
+        clearDatabase("store_product");
 //        employees();
 //        categories();
 //        customers();
-        products();
+//        products();
+        productsInStore();
     }
 
     private final SecureRandom random = new SecureRandom();
@@ -281,6 +281,43 @@ public class LoadTestDataIntoDB {
 
                 statement.executeUpdate(insertQuery);
             }
+
+            statement.close();
+            connectDB.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void productsInStore(){
+        try {
+            DatabaseConnection connection = new DatabaseConnection();
+            Connection connectDB = connection.getConnection();
+            Statement statement = connectDB.createStatement();
+
+
+            String insertQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, product_number, promotional_product) " +
+                    "VALUES ('" + 111111111 + "', null, '" + "300617681" + "', '" + 700 + "', '" + 15 + "', '" +
+                    0 + "')";
+
+            statement.executeUpdate(insertQuery);
+
+            insertQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, product_number, promotional_product) " +
+                    "VALUES ('" + 22222222 + "', null, '" + "71435173" + "', '" + 200 + "', '" + 222 + "', '" +
+                    1 + "')";
+
+            statement.executeUpdate(insertQuery);
+
+            insertQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, product_number, promotional_product) " +
+                    "VALUES ('" + 21212121 + "', null, '" + "71435173" + "', '" + 250 + "', '" + 13 + "', '" +
+                    0 + "')";
+
+            statement.executeUpdate(insertQuery);
+//            for (int i = 0; i < surnames.length; i++) {
+//                String id_gen = generateRandomId(10, false);
+//
+//
+//            }
 
             statement.close();
             connectDB.close();

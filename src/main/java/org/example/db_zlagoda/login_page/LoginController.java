@@ -64,7 +64,9 @@ public class LoginController {
                         stage.close();
                         cashierScreen(id_employee);
                     }else{
-
+                        Stage stage = (Stage) cancelButton.getScene().getWindow();
+                        stage.close();
+                        managerScreen();
                     }
                 } else {
                     invalidUserInfoError.setText("Error fetching employee role.");
@@ -79,6 +81,19 @@ public class LoginController {
             statement.close();
         } catch (SQLException error) {
             error.printStackTrace();
+        }
+    }
+
+    public void managerScreen(){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/manager_page/manager-page-view.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

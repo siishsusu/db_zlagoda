@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.product_page.product.ProductsController">
+   <content>
+      <AnchorPane fx:id="allPane" prefHeight="800.0" prefWidth="1000.0">
+         <children>
+            <TableView fx:id="productsTable" layoutX="68.4" layoutY="65.0" prefHeight="462.0" prefWidth="898.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="80.0">
+               <columns>
+                  <TableColumn fx:id="idColumn" prefWidth="100.0" text="id" />
+                  <TableColumn fx:id="categoryNumColumn" prefWidth="150.0" text="Номер категорії" />
+                  <TableColumn fx:id="categoryNameColumn" prefWidth="150.0" text="Назва категорії" />
+                  <TableColumn fx:id="productNameColumn" prefWidth="150.0" text="Назва продукту" />
+                  <TableColumn fx:id="characteristicColumn" prefWidth="400.0" text="Характеристики" />
+               </columns>
+            </TableView>
+            <Button fx:id="allProductsButton" layoutX="218.0" layoutY="30.0" mnemonicParsing="false" onAction="#allProductsButtonOnAction" prefWidth="270.0" text="Всі товари" AnchorPane.leftAnchor="200.0" AnchorPane.topAnchor="15.0" />
+            <Button fx:id="productsInStoreButton" layoutX="584.0" layoutY="30.0" mnemonicParsing="false" onAction="#productsInStoreButtonButtonOnAction" prefWidth="270.0" text="Товари в магазині" AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="15.0" />
+            <HBox alignment="CENTER" layoutX="50.0" layoutY="542.0" prefHeight="50.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="51.600000000000136">
+               <children>
+                  <Button fx:id="updateButton" mnemonicParsing="false" onAction="#updateButtonOnAction" prefWidth="200.0" text="Оновити інформацію про товар">
+                     <HBox.margin>
+                        <Insets left="20.0" right="20.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteButtonOnAction" prefWidth="200.0" text="Видалити інформацію про товар">
+                     <HBox.margin>
+                        <Insets left="20.0" right="20.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="addButton" mnemonicParsing="false" onAction="#addButtonOnAction" prefWidth="200.0" text="Додати товар">
+                     <HBox.margin>
+                        <Insets left="20.0" right="20.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+            </HBox>
+            <TextField fx:id="categoryField" layoutX="51.0" layoutY="55.0" prefHeight="25.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="410.0" AnchorPane.topAnchor="50.0" />
+            <Button fx:id="searchButton" layoutX="800.0" layoutY="50.0" mnemonicParsing="false" onAction="#searchButtonButtonButtonOnAction" prefHeight="25.0" prefWidth="200.0" text="Знайти" AnchorPane.rightAnchor="200.0" />
+            <ComboBox fx:id="searchOption" layoutX="200.0" layoutY="50.0" prefHeight="25.0" prefWidth="105.0" AnchorPane.leftAnchor="200.0" />
+            <Button fx:id="clearFieldButton" layoutX="766.0" layoutY="50.0" mnemonicParsing="false" onAction="#clearFieldButtonButtonOnAction" prefHeight="25.0" prefWidth="10.0" text="X" AnchorPane.rightAnchor="405.0" />
+            <BorderPane fx:id="updateAddBlock" layoutX="60.0" layoutY="587.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
+               <center>
+                  <HBox fx:id="updateAddContainer" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <VBox layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="250.0">
+                           <HBox.margin>
+                              <Insets left="50.0" right="50.0" />
+                           </HBox.margin>
+                           <children>
+                              <VBox prefHeight="200.0" prefWidth="250.0" />
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="300.0">
+                           <children>
+                              <Label fx:id="infoLabel" text="Оновлення інформації">
+                                 <font>
+                                    <Font size="25.0" />
+                                 </font>
+                              </Label>
+                              <Label text="Назва продукту">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </Label>
+                              <TextField fx:id="productNameField" prefWidth="200.0">
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="20.0" right="20.0" top="2.0" />
+                                 </VBox.margin>
+                              </TextField>
+                              <Label text="Характеристики">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </Label>
+                              <TextField fx:id="productCharacteristicsField" prefWidth="200.0">
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="20.0" right="20.0" top="2.0" />
+                                 </VBox.margin>
+                              </TextField>
+                              <Label layoutX="20.0" layoutY="56.0" text="Назва категорії">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </Label>
+                              <ComboBox fx:id="categoryNamesBox" prefHeight="26.0" prefWidth="257.0">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </ComboBox>
+                              <Button fx:id="doUpdateButton" mnemonicParsing="false" prefWidth="200.0" text="Оновити">
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="2.0" />
+                                 </VBox.margin>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </center>
+            </BorderPane>
+            <Button fx:id="printButton" layoutX="917.0" layoutY="50.0" mnemonicParsing="false" onAction="#printButtonOnAction" prefHeight="25.0" prefWidth="30.0" text="🖶" AnchorPane.rightAnchor="50.0" />
+         </children>
+      </AnchorPane>
+   </content>
+</ScrollPane>

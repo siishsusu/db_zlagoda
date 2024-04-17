@@ -5,6 +5,10 @@ module org.example.db_zlagoda {
     requires java.sql;
     requires mysql.connector.j;
     requires org.controlsfx.controls;
+    requires java.desktop;
+    requires org.apache.pdfbox;
+    requires itext;
+    requires itextpdf;
 
     opens org.example.db_zlagoda to javafx.fxml;
     exports org.example.db_zlagoda;
@@ -29,4 +33,17 @@ module org.example.db_zlagoda {
     opens org.example.db_zlagoda.employees_list to javafx.fxml;
     exports org.example.db_zlagoda.search;
     opens org.example.db_zlagoda.search to javafx.fxml;
+
+    exports org.example.db_zlagoda.manager_page;
+    opens org.example.db_zlagoda.manager_page to javafx.fxml;
+    exports org.example.db_zlagoda.customers_list;
+    opens org.example.db_zlagoda.customers_list to javafx.fxml;
+    exports org.example.db_zlagoda.product_page;
+    opens org.example.db_zlagoda.product_page to javafx.fxml;
+    exports org.example.db_zlagoda.product_page.category;
+    opens org.example.db_zlagoda.product_page.category to javafx.fxml;
+    exports org.example.db_zlagoda.product_page.productInStore;
+    opens org.example.db_zlagoda.product_page.productInStore to javafx.fxml;
+    exports org.example.db_zlagoda.product_page.product;
+    opens org.example.db_zlagoda.product_page.product to javafx.fxml;
 }
