@@ -101,6 +101,9 @@ public class CustomersListController implements Initializable {
             } else {
                 updateButton.setDisable(false);
                 deleteButton.setDisable(false);
+
+                Object[] selectedProduct = customersTable.getSelectionModel().getSelectedItem();
+                searchPercentField.setText(selectedProduct[4].toString());
             }
         });
 

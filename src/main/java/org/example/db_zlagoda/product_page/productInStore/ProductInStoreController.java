@@ -114,6 +114,9 @@ public class ProductInStoreController implements Initializable {
             } else {
                 updateButton.setDisable(false);
                 deleteButton.setDisable(false);
+
+                Object[] selectedProduct = productsInStoreTable.getSelectionModel().getSelectedItem();
+                UPC_field.setText(selectedProduct[0].toString());
             }
         });
     }
@@ -210,7 +213,7 @@ public class ProductInStoreController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
             Parent root = loader.load();
             ProductInStoreAddUpdateController controller = loader.getController();
-            controller.fillFields(prod_upc);
+            controller.fillFields(prod_upc, false);
             controller.update();
 
             Stage stage = new Stage();

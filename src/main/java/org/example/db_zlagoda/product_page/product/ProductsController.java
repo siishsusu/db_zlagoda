@@ -10,13 +10,18 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.print.PrinterJob;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.example.db_zlagoda.DatabaseConnection;
+import org.example.db_zlagoda.product_page.productInStore.ProductInStoreAddUpdateController;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,7 +44,7 @@ public class ProductsController implements Initializable {
     private TableView<Object[]> productsTable;
 
     @FXML
-    private Button updateButton, deleteButton, addButton, doUpdateButton;
+    private Button updateButton, deleteButton, addButton, doUpdateButton, addToStoreButton;
 
     @FXML
     private ComboBox<String> searchOption;
@@ -98,6 +103,7 @@ public class ProductsController implements Initializable {
         categoryField.setDisable(true);
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
+        addToStoreButton.setDisable(true);
 
         searchOption.valueProperty().addListener((observable, oldValue, option) -> {
             if (option != null) {
@@ -118,10 +124,12 @@ public class ProductsController implements Initializable {
             if (newSelection == null) {
                 updateButton.setDisable(true);
                 deleteButton.setDisable(true);
+                addToStoreButton.setDisable(true);
             } else {
                 searchButton.setDisable(false);
                 updateButton.setDisable(false);
                 deleteButton.setDisable(false);
+                addToStoreButton.setDisable(false);
             }
         });
 
@@ -155,6 +163,58 @@ public class ProductsController implements Initializable {
             e.printStackTrace();
         }
         return result;
+    }
+
+    @FXML
+    public void addToStoreButtonOnAction (ActionEvent event) throws IOException {
+        try{
+            Object[] selectedProduct = productsTable.getSelectionModel().getSelectedItem();
+            if (selectedProduct != null) {
+                String id_prod_selected = selectedProduct[0].toString();
+
+                DatabaseConnection connection = new DatabaseConnection();
+                Connection connectDB = connection.getConnection();
+                Statement statement = connectDB.createStatement();
+
+                // Додавати товар в магазин
+
+                String checkProductsQuery = "SELECT COUNT(*) FROM store_product " +
+                        "WHERE id_product = '" + id_prod_selected + "'";
+                ResultSet resultSet = statement.executeQuery(checkProductsQuery);
+                resultSet.next();
+                int productCount = resultSet.getInt(1);
+
+                if (productCount == 2) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Помилка");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Неможливо додати товар, оскільки він вже є в магазині (і неакційний, і акційний).");
+                    alert.showAndWait();
+                } else {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
+                    Parent root = loader.load();
+                    ProductInStoreAddUpdateController controller = loader.getController();
+                    controller.add();
+                    controller.fillFields(id_prod_selected, true);
+
+                    Stage stage = new Stage();
+                    stage.setScene(new Scene(root));
+                    stage.show();
+
+                    clearTable();
+                    loadProductsData();
+                }
+
+                resultSet.close();
+                statement.close();
+                connectDB.close();
+
+                clearTable();
+                loadProductsData();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -276,7 +336,6 @@ public class ProductsController implements Initializable {
         }
         return result;
     }
-
 
     private void cleanFields(){
         for (TextField textField : textFieldList) {
@@ -455,6 +514,7 @@ public class ProductsController implements Initializable {
     @FXML
     public void allProductsButtonOnAction (ActionEvent event) throws IOException {
         clearTable();
+        SCREEN = 0;
         loadProductsData();
     }
 
@@ -465,7 +525,9 @@ public class ProductsController implements Initializable {
 
     @FXML
     public void productsInStoreButtonButtonOnAction (ActionEvent event) throws IOException {
-
+        clearTable();
+        SCREEN = 1;
+        loadProductsData();
     }
 
     @FXML
@@ -547,12 +609,11 @@ public class ProductsController implements Initializable {
             }else if(SCREEN == 1){
                 // 10. Отримати інформацію про усі товари у магазині, відсортовані за кількістю;
                 product_information = statement.executeQuery(
-                        "SELECT product.id_product, product.category_number, " +
-                                "category.category_name, product.product_name, " +
-                                "product.characteristics " +
+                        "SELECT DISTINCT product.id_product, product.category_number, category.category_name, " +
+                                "product.product_name, product.characteristics " +
                                 "FROM product " +
-                                "INNER JOIN category " +
-                                "ON category.category_number = product.category_number " +
+                                "INNER JOIN category ON category.category_number = product.category_number " +
+                                "INNER JOIN store_product ON store_product.id_product = product.id_product " +
                                 "ORDER BY product.product_name;");
             }
 
@@ -566,6 +627,7 @@ public class ProductsController implements Initializable {
                 };
                 productsTable.getItems().add(rowData);
             }
+
 
             product_information.close();
             statement.close();

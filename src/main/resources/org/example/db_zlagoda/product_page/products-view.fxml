@@ -46,6 +46,7 @@
                         <Insets left="20.0" right="20.0" />
                      </HBox.margin>
                   </Button>
+                  <Button fx:id="addToStoreButton" layoutX="599.0" layoutY="22.0" mnemonicParsing="false" onAction="#addToStoreButtonOnAction" prefWidth="200.0" text="Додати цей товар в магазин" />
                </children>
             </HBox>
             <TextField fx:id="categoryField" layoutX="51.0" layoutY="55.0" prefHeight="25.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="410.0" AnchorPane.topAnchor="50.0" />

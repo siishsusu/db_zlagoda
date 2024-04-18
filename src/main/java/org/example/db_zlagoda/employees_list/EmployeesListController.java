@@ -143,6 +143,9 @@ public class EmployeesListController implements Initializable {
                 updateButton.setDisable(false);
                 deleteButton.setDisable(false);
                 printThisEmployeeButton.setDisable(false);
+
+                Object[] selected = employeesTable.getSelectionModel().getSelectedItem();
+                surnameField.setText(selected[1].toString());
             }
         });
 
