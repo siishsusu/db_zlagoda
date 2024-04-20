@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox fx:id="viewContainer" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.db_zlagoda.cashier_page.Controllers.AddClientCardToReceiptController" prefHeight="800.0" prefWidth="1200.0" spacing="10">
+<children>
+    <Label text="Пошук постійних клієнтів" />
+    <VBox prefWidth="900">
+        <children>
+            <HBox alignment="CENTER_LEFT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="900.0" spacing="5.0">
+                <children>
+                    <Button mnemonicParsing="false" text="Фільтри" />
+                    <TextArea maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                </children>
+                <padding>
+                    <Insets bottom="5.0" top="5.0" />
+                </padding>
+            </HBox>
+            <TableView fx:id="clientsTable" nodeOrientation="LEFT_TO_RIGHT" prefHeight="1000">
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                </columnResizePolicy>
+                <columns>
+                    <TableColumn fx:id="id" text="Номер карти" />
+                    <TableColumn fx:id="name" text="ПІБ" />
+                    <TableColumn fx:id="phone" text="Телефон" />
+                    <TableColumn fx:id="address" text="Адреса" />
+                    <TableColumn fx:id="discount" text="Знижка" />
+                </columns>
+            </TableView>
+            <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="1200.0" spacing="5.0">
+                <children>
+                    <Button onAction="#closeMenu" mnemonicParsing="false" text="Скасувати" />
+                    <Button fx:id="addCardButton" onAction="#addCard" mnemonicParsing="false" text="Додати" />
+                </children>
+                <padding>
+                    <Insets bottom="5.0" top="5.0" />
+                </padding>
+            </HBox>
+        </children>
+    </VBox>
+</children>
+<padding>
+    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+</padding>
+</VBox>

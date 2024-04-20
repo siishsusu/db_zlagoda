@@ -6,8 +6,8 @@ public class ProductItem{
     private int amount;
     private String upc;
     private double price;
-    public ProductItem(String utc, String name, int amount, double price) {
-        this.upc = utc;
+    public ProductItem(String upc, String name, int amount, double price) {
+        this.upc = upc;
         this.name = name;
         this.amount = amount;
         this.price = price;

@@ -1,13 +1,16 @@
 package org.example.db_zlagoda.cashier_page.Models;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import org.example.db_zlagoda.cashier_page.Controllers.CashierMenuViewController;
 import org.example.db_zlagoda.db_data.DatabaseManager;
 import org.example.db_zlagoda.utils.Exceptions.NegativeAmountException;
 import org.example.db_zlagoda.utils.receipt_tools.Receipt;
 import org.example.db_zlagoda.utils.tableview_tools.ClientItem;
 import org.example.db_zlagoda.utils.tableview_tools.ProductItem;
 
+import java.util.Collections;
 import java.util.Objects;
 
 public class SessionData {
@@ -25,7 +28,7 @@ public class SessionData {
     }
 
     private void loadProducts() {
-        products = DatabaseManager.getProductTableItems();
+        products = DatabaseManager.getProductTableItems(CashierMenuViewController.database);
     }
 
     private void loadClients() {
@@ -91,5 +94,6 @@ public class SessionData {
 
     public void addReceipt(Receipt receipt) {
         receipts.add(receipt);
+        receipts.sort(Collections.reverseOrder());
     }
 }

@@ -22,7 +22,7 @@
         </VBox>
         <VBox spacing="5">
             <Button fx:id="receiptButton" alignment="TOP_CENTER" maxWidth="1.7976931348623157E308" onAction="#openReceipt" text="Створити чек" />
-            <Button alignment="TOP_CENTER" maxWidth="1.7976931348623157E308" text="Історія чеків" />
+            <Button fx:id="receiptHistoryButton" alignment="TOP_CENTER" maxWidth="1.7976931348623157E308" onAction="#openHistory" text="Історія чеків" />
         </VBox>
     </VBox>
 
@@ -61,7 +61,7 @@
                     </padding>
                     <children>
                         <Button mnemonicParsing="false" text="Видалити" onAction="#deleteReceipt"/>
-                        <Button mnemonicParsing="false" text="Зберегти" onAction="#saveReceipt"/>
+                        <Button fx:id="saveReceiptButton" mnemonicParsing="false" text="Зберегти" onAction="#saveReceipt"/>
                         <Label fx:id="receipt_sum" alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Сума"
                                HBox.hgrow="ALWAYS"/>
                     </children>
@@ -222,5 +222,40 @@
         <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
         </padding>
+    </VBox>
+    <VBox fx:id="receiptHistoryMenu" prefWidth="1000" spacing="10">
+        <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+        </padding>
+        <children>
+            <VBox prefWidth="900">
+                <children>
+                    <Label maxWidth="1.7976931348623157E308" text="Історія чеків">
+                        <font>
+                            <Font size="18.0" />
+                        </font>
+                    </Label>
+                    <TableView fx:id="receiptHistoryTable" nodeOrientation="LEFT_TO_RIGHT" prefHeight="1000">
+                        <columns>
+                            <TableColumn fx:id="history_num" text="Номер" />
+                            <TableColumn fx:id="history_date" text="Дата" />
+                            <TableColumn fx:id="history_sum" text="Загальна сума" />
+                            <TableColumn fx:id="history_vat" text="ПДВ" />
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                        </columnResizePolicy>
+                    </TableView>
+                    <HBox alignment="CENTER_LEFT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="900.0" spacing="5.0">
+                        <padding>
+                            <Insets bottom="5.0" top="5.0" />
+                        </padding>
+                        <children>
+                            <Button mnemonicParsing="false" onAction="#addMoreReceipsMenu" text="Завантажити більше чеків" />
+                        </children>
+                    </HBox>
+                </children>
+            </VBox>
+        </children>
     </VBox>
 </HBox>

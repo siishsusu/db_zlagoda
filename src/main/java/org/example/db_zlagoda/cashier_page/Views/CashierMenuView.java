@@ -24,9 +24,9 @@ public class CashierMenuView extends Application {
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setTitle("Меню касира");
         stage.show();
-
-        controller = loader.getController();
     }
+
+
 
     public static void main(String[] args) {
         launch();

@@ -1,15 +1,16 @@
 package org.example.db_zlagoda;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
+import org.example.db_zlagoda.utils.tableview_tools.ClientItem;
+
+import java.sql.*;
 
 public class DatabaseConnection {
     public Connection databaseLink;
 
     public Connection getConnection(){
-        String databaseName = "zzlagoda_db",
+        String databaseName = "zlagoda_db",
                 databaseUser = "root",
-                databasePassword = "Yellow768215!",
+                databasePassword = "qenze22KaNkKa",
                 link = "jdbc:mysql://localhost/" + databaseName;
 
         try {
@@ -21,4 +22,5 @@ public class DatabaseConnection {
         }
         return databaseLink;
     }
+
 }

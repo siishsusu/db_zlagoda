@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox fx:id="viewContainer" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.db_zlagoda.cashier_page.Controllers.CheckoutViewController" prefHeight="700" prefWidth="1000" spacing="10">
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+    </padding>
+    <children>
+        <Label alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" text="Перегляд чеку">
+            <font>
+                <Font size="20.0" />
+            </font>
+        </Label>
+        <TableView fx:id="receiptTable" nodeOrientation="LEFT_TO_RIGHT" prefHeight="1000">
+            <columns>
+                <TableColumn fx:id="receipt_upc" text="UPC" />
+                <TableColumn fx:id="receipt_name" text="Назва" />
+                <TableColumn fx:id="receipt_amount" text="Кількість" />
+                <TableColumn fx:id="receipt_price" text="Ціна" />
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
+        </TableView>
+        <Label fx:id="receipt_total" maxWidth="1.7976931348623157E308" text="Сума: ">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Label>
+        <Label fx:id="receipt_vat" maxWidth="1.7976931348623157E308" text="ПДВ: ">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Label>
+        <Label fx:id="receipt_discount" maxWidth="1.7976931348623157E308" text="Знижка:">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Label>
+        <Line endX="1000.0" />
+
+        <HBox alignment="CENTER_LEFT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="900.0" spacing="5.0">
+            <padding>
+                <Insets bottom="5.0" top="5.0" />
+            </padding>
+            <children>
+                <Button mnemonicParsing="false" onAction="#deleteReceipt" text="Видалити" />
+                <Button mnemonicParsing="false" onAction="#saveReceipt" text="Зберегти" />
+                <Label fx:id="receipt_sum" alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Сума (з ПДВ):" HBox.hgrow="ALWAYS">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                </Label>
+            </children>
+            <opaqueInsets>
+                <Insets />
+            </opaqueInsets>
+        </HBox>
+    </children>
+</VBox>

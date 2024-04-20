@@ -28,7 +28,7 @@ public class AddProductToReceiptMenuController {
 
     public void initialize() {
         TableViewLoader.initProductsTable(productsTable, product_upc, product_name, product_amount, product_price);
-        productsTable.setItems(CashierMenuView.controller.data.getProducts());
+        productsTable.setItems(ControllerAccess.cashierMenuViewController.data.getProducts());
         selectAmountButton.setDisable(true);
         productsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -125,7 +125,7 @@ public class AddProductToReceiptMenuController {
     }
 
     private void addProductToReceipt() {
-        CashierMenuView.controller.addReceiptProduct(productSelected, amountSelected);
+        ControllerAccess.cashierMenuViewController.addReceiptProduct(productSelected, amountSelected);
     }
 
 

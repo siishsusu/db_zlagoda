@@ -5,6 +5,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.example.db_zlagoda.db_data.DatabaseManager;
 
+import java.sql.Date;
+
 public class TableViewLoader {
     public static void initProductsTable(TableView table, TableColumn upc,
                                          TableColumn name, TableColumn amount, TableColumn price) {
@@ -22,5 +24,14 @@ public class TableViewLoader {
         phone.setCellValueFactory(new PropertyValueFactory<ClientItem, String>("phone"));
         address.setCellValueFactory(new PropertyValueFactory<ClientItem, String>("address"));
         discount.setCellValueFactory(new PropertyValueFactory<ClientItem, Double>("discount"));
+    }
+
+    public static void initReceiptHistoryTable(TableView table, TableColumn num,
+                                        TableColumn date, TableColumn sum,
+                                        TableColumn vat) {
+        num.setCellValueFactory(new PropertyValueFactory<ClientItem, Integer>("id"));
+        date.setCellValueFactory(new PropertyValueFactory<ClientItem, Date>("date"));
+        sum.setCellValueFactory(new PropertyValueFactory<ClientItem, Double>("sum"));
+        vat.setCellValueFactory(new PropertyValueFactory<ClientItem, String>("vat"));
     }
 }
