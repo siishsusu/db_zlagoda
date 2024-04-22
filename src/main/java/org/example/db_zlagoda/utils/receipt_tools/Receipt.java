@@ -11,11 +11,11 @@ public class Receipt implements Comparable<Receipt> {
     private double sum = 0;
     private double vat = 0;
     private String employee;
-    private String card;
+    private ClientItem card;
     private ObservableList<ProductItem> products;
     private int id = 0;
 
-    public Receipt(Date date, ObservableList<ProductItem> products, String employee, String card) {
+    public Receipt(Date date, ObservableList<ProductItem> products, String employee, ClientItem card) {
         this.date = date;
         this.employee = employee;
         this.card = card;
@@ -23,7 +23,7 @@ public class Receipt implements Comparable<Receipt> {
         initPriceFields(products);
     }
 
-    public Receipt(int id, String employee, String card, double sum, double vat, Date date) {
+    public Receipt(int id, String employee, ClientItem card, double sum, double vat, Date date) {
         this.id = id;
         this.employee = employee;
         this.card = card;
@@ -55,7 +55,7 @@ public class Receipt implements Comparable<Receipt> {
         return employee;
     }
 
-    public String getCard() {
+    public ClientItem getCard() {
         return card;
     }
 
@@ -73,7 +73,7 @@ public class Receipt implements Comparable<Receipt> {
 
     @Override
     public int compareTo(Receipt o) {
-        return Integer.compare(id, o.id);
+        return Long.compare(date.getTime(), o.getDate().getTime());
     }
 
     @Override

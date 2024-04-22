@@ -11,10 +11,10 @@
                 <Label text="Додати товари до чеку" />
                 <VBox>
                     <children>
-                        <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="1200.0" spacing="5.0">
+                        <HBox alignment="CENTER_LEFT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="900.0" spacing="5.0">
                             <children>
-                                <Button mnemonicParsing="false" text="Фільтри" />
-                                <TextArea maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                                <Button onAction="#openFiltersMenu" maxHeight="1.7976931348623157E308" mnemonicParsing="false" text="Фільтри" />
+                                <TextArea fx:id="productSearchQuery" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefWidth="200.0" HBox.hgrow="ALWAYS" />
                             </children>
                             <padding>
                                 <Insets bottom="5.0" top="5.0" />
@@ -27,8 +27,10 @@
                             <columns>
                                 <TableColumn fx:id="product_upc" text="UPC" />
                                 <TableColumn fx:id="product_name" text="Назва" />
+                                <TableColumn fx:id="product_category" text="Категорія" />
                                 <TableColumn fx:id="product_amount" text="Кількість" />
                                 <TableColumn fx:id="product_price" text="Ціна" />
+                                <TableColumn fx:id="product_prom" text="Наявність акції" />
                             </columns>
                         </TableView>
                         <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="1200.0" spacing="5.0">

@@ -18,15 +18,14 @@ module org.example.db_zlagoda {
     exports org.example.db_zlagoda.db_data;
     exports org.example.db_zlagoda.utils.tableview_tools;
     exports org.example.db_zlagoda.utils.receipt_tools;
+    exports org.example.db_zlagoda.utils;
     opens org.example.db_zlagoda.login_page to javafx.fxml;
     opens org.example.db_zlagoda.cashier_page.Controllers to javafx.fxml;
     opens org.example.db_zlagoda.cashier_page.Views to javafx.fxml;
     opens org.example.db_zlagoda.db_data to javafx.fxml;
     opens org.example.db_zlagoda.utils.tableview_tools to javafx.fxml;
     opens org.example.db_zlagoda.utils.receipt_tools to javafx.fxml;
-//    opens org.example.db_zlagoda.cashier_page to javafx.fxml;
-//    exports org.example.db_zlagoda.cashier_page.Views;
-//    opens org.example.db_zlagoda.cashier_page.Views to javafx.fxml;
+    opens org.example.db_zlagoda.utils to javafx.fxml;
     exports org.example.db_zlagoda.update_employee_page;
     opens org.example.db_zlagoda.update_employee_page to javafx.fxml;
     exports org.example.db_zlagoda.employees_list;

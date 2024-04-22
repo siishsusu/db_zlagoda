@@ -1,16 +1,62 @@
 package org.example.db_zlagoda.utils.tableview_tools;
 
+import org.example.db_zlagoda.cashier_page.Controllers.CashierMenuViewController;
+import org.example.db_zlagoda.cashier_page.Controllers.ControllerAccess;
+import org.example.db_zlagoda.db_data.DatabaseManager;
+
+import java.sql.SQLException;
+
 public class ProductItem{
 
     private String name;
     private int amount;
     private String upc;
+    private String saleUpc;
     private double price;
-    public ProductItem(String upc, String name, int amount, double price) {
+    private CategoryItem category;
+    private String onSale;
+    private int promotionalProduct;
+
+    public ProductItem(String upc, String saleUpc, String name, int amount, double price, int category, int promotionalProduct) throws SQLException {
+        this.upc = upc;
+        this.saleUpc = saleUpc;
+        this.name = name;
+        this.amount = amount;
+        this.price = price;
+        this.category = setCategoryByID(category);
+        this.promotionalProduct = promotionalProduct;
+        setOnSale();
+    }
+
+    public ProductItem(String upc, String saleUpc, String name, int amount, double price, CategoryItem category, int promotionalProduct) {
         this.upc = upc;
         this.name = name;
         this.amount = amount;
         this.price = price;
+        this.category = category;
+    }
+
+    public int getPromotionalProduct() {
+        return promotionalProduct;
+    }
+
+    public void setPromotionalProduct(int promotionalProduct) {
+        this.promotionalProduct = promotionalProduct;
+    }
+
+    private CategoryItem setCategoryByID(int id) throws SQLException {
+        return DatabaseManager.getCategoryByID(id);
+    }
+    public CategoryItem getCategory() {
+        return category;
+    }
+
+    public String getSaleUpc() {
+        return saleUpc;
+    }
+
+    public String getOnSale() {
+        return onSale;
     }
 
     public int getAmount() {
@@ -26,7 +72,12 @@ public class ProductItem{
     }
 
     public double getPrice() {
-        return price;
+        if(promotionalProduct == 1) return price * 0.8;
+        else return price;
+    }
+
+    public void setSaleUpc(String saleUpc) {
+        this.saleUpc = saleUpc;
     }
 
     public void setAmount(int amount) {
@@ -43,6 +94,15 @@ public class ProductItem{
 
     public void setUpc(String utc) {
         this.upc = utc;
+    }
+
+    public void setCategory(CategoryItem category) {
+        this.category = category;
+    }
+
+    public void setOnSale() {
+        if(promotionalProduct == 1) this.onSale = "Акційна ціна";
+        else this.onSale = "Повна ціна";
     }
 
     @Override

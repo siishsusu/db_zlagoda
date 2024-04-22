@@ -1,16 +1,19 @@
 package org.example.db_zlagoda.cashier_page.Controllers;
 
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.example.db_zlagoda.utils.receipt_tools.Receipt;
 import org.example.db_zlagoda.utils.tableview_tools.ProductItem;
 import org.example.db_zlagoda.utils.tableview_tools.TableViewLoader;
 
-public class CheckoutViewController {
+public class CheckViewController {
+
+    public static Receipt receipt;
+
     public VBox viewContainer;
 
     public TableView receiptTable;
@@ -29,15 +32,15 @@ public class CheckoutViewController {
 
     public void initialize() {
         TableViewLoader.initProductsTable(receiptTable, receipt_upc, receipt_name, receipt_category, receipt_amount, receipt_price, receipt_prom);
-        receiptTable.setItems(ControllerAccess.cashierMenuViewController.receiptItems);
+        receiptTable.setItems(receipt.getProducts());
         double total = 0;
         double vat;
         double totalAndVat;
-        double discount = ControllerAccess.cashierMenuViewController.receiptClientCard == null
+        double discount = receipt.getCard() == null
                 ? 0
-                : ControllerAccess.cashierMenuViewController.receiptClientCard.getDiscount()/100;
-        for(ProductItem item : ControllerAccess.cashierMenuViewController.receiptItems) {
-            total += item.getPrice();
+                : receipt.getCard().getDiscount()/100;
+        for(ProductItem item : receipt.getProducts()) {
+            total += item.getPrice() * item.getAmount();
         }
         vat = total * 0.2;
         totalAndVat = (total + vat) * (1-discount);
@@ -48,15 +51,8 @@ public class CheckoutViewController {
         receipt_sum.textProperty().set(String.format("Сума (з ПДВ): %.2f грн", totalAndVat));
     }
 
-    @FXML
-    public void deleteReceipt(ActionEvent actionEvent) {
-        ControllerAccess.cashierMenuViewController.cashierMenuContainer.setDisable(false);
-        ((Stage)viewContainer.getScene().getWindow()).close();
-    }
 
-    @FXML
-    public void saveReceipt(ActionEvent actionEvent) {
-        deleteReceipt(actionEvent);
-        ControllerAccess.cashierMenuViewController.saveReceiptToDB();
+    public void closeWindow(ActionEvent actionEvent) {
+        ((Stage)viewContainer.getScene().getWindow()).close();
     }
 }

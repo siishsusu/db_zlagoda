@@ -6,6 +6,8 @@ import javafx.stage.Stage;
 import org.example.db_zlagoda.cashier_page.Views.CashierMenuView;
 import org.example.db_zlagoda.login_page.LoginPage;
 import org.example.db_zlagoda.login_page.RegistrationPage;
+import org.example.db_zlagoda.manager_page.ManagerPageController;
+import org.example.db_zlagoda.manager_page.ManagerPageView;
 import org.example.db_zlagoda.search.FindEmployee;
 import org.example.db_zlagoda.update_employee_page.UpdateEmployee;
 
@@ -32,8 +34,7 @@ public class MenuChanger {
                 return CashierMenuView.class.getResource(fxml);
             }
             case ManagerView -> {
-                return null;
-                //return ManagerMenuView.class.getResource(fxml);
+                return ManagerPageView.class.getResource(fxml);
             }
             case LoginView -> {
                 return LoginPage.class.getResource(fxml);

@@ -6,10 +6,12 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -18,14 +20,15 @@ import org.example.db_zlagoda.DatabaseConnection;
 import org.example.db_zlagoda.cashier_page.Models.SessionData;
 import org.example.db_zlagoda.cashier_page.Models.UserData;
 import org.example.db_zlagoda.db_data.DatabaseManager;
+import org.example.db_zlagoda.manager_page.ManagerPageView;
 import org.example.db_zlagoda.utils.Exceptions.NegativeAmountException;
+import org.example.db_zlagoda.utils.SaleFilter;
 import org.example.db_zlagoda.utils.receipt_tools.Receipt;
-import org.example.db_zlagoda.utils.tableview_tools.ClientItem;
-import org.example.db_zlagoda.utils.tableview_tools.ProductItem;
-import org.example.db_zlagoda.utils.tableview_tools.TableViewLoader;
+import org.example.db_zlagoda.utils.tableview_tools.*;
 import org.example.db_zlagoda.utils.MenuChanger;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -39,10 +42,14 @@ public class CashierMenuViewController {
     public Label idField, PIBField, roleField, salaryField, firstDayField, birthDateField, phoneField, addressField;
 
     public HBox cashierMenuContainer;
+    public VBox productsTablesContainer;
 
     public VBox receiptMenu;
+    //замінив на менюшки менеджера
     public VBox searchProductsMenu;
     public VBox searchClientsMenu;
+    //public AnchorPane searchClientsMenu;
+//    public AnchorPane searchProductsMenu;
     public VBox userProfileMenu;
     public VBox receiptHistoryMenu;
 
@@ -56,13 +63,17 @@ public class CashierMenuViewController {
 
     public TableColumn product_upc;
     public TableColumn product_name;
+    public TableColumn product_category;
     public TableColumn product_amount;
     public TableColumn product_price;
+    public TableColumn product_prom;
 
     public TableView productsTable;
     public TableView clientsTable;
     public TableView receiptTable;
     public TableView receiptHistoryTable;
+    public TableView allProductsTable;
+    public TableView categoryTable;
 
     public TableColumn client_id;
     public TableColumn client_name;
@@ -74,13 +85,31 @@ public class CashierMenuViewController {
     public TableColumn receipt_name;
     public TableColumn receipt_amount;
     public TableColumn receipt_price;
+    public TableColumn receipt_category;
+    public TableColumn receipt_prom;
 
     public TableColumn history_num;
     public TableColumn history_date;
     public TableColumn history_sum;
     public TableColumn history_vat;
 
+    public TableColumn product_id;
+    public TableColumn product_name_all;
+    public TableColumn category_all;
+    public TableColumn product_description;
+
+    public TableColumn category_id;
+    public TableColumn category_name;
+
     public Label receipt_sum;
+
+    public Button categoriesButton;
+    public Button productsStoreButton;
+    public Button productsAllButton;
+
+    public ChoiceBox productsFilterChoiceBox;
+    public TextArea productSearchQuery;
+
 
     private VBox[] menus;
     private Button[] menuButtons;
@@ -89,38 +118,98 @@ public class CashierMenuViewController {
     public ObservableList<ProductItem> receiptItems;
     public ClientItem receiptClientCard;
     public SessionData data;
-    public static Statement database;
+    public static Connection database;
     public static UserData user;
+    public ObservableList<String> productFilters;
+    public String productSearchType = "product_name";
+
+    private SaleFilter saleFilter = SaleFilter.All;
+    private CategoryItem categoryFilter = null;
+
 
     public void initialize() {
         ControllerAccess.cashierMenuViewController = this;
-        try{
-            CashierMenuViewController.database = new DatabaseConnection().getConnection().createStatement();
-        } catch (SQLException e) {
-            database = null;
-            e.printStackTrace();
-        }
+        CashierMenuViewController.database = new DatabaseConnection().getConnection();
+
         menus = new VBox[] {userProfileMenu, receiptMenu, searchProductsMenu, searchClientsMenu, receiptHistoryMenu};
         menuButtons = new Button[] {userProfileButton, productsButton, receiptButton, clientsButton, receiptHistoryButton};
-        tableViews = new TableView[] {productsTable, clientsTable, receiptTable, receiptHistoryTable};
+        tableViews = new TableView[] {productsTable, allProductsTable, categoryTable, receiptTable, receiptHistoryTable};
         removeAllMenus();
         receiptItems = FXCollections.observableArrayList();
         receiptItems.addListener((ListChangeListener<ProductItem>) _ -> saveReceiptButton.setDisable(receiptItems.isEmpty()));
         saveReceiptButton.setDisable(true);
         data = new SessionData();
+
+        productSearchQuery.textProperty().addListener(_ ->{
+            filterProducts(productSearchQuery.textProperty().get());
+        });
+
+        filterProducts(productSearchQuery.textProperty().get());
     }
 
+    public void filterProducts(String filter) {
+        if(filter == null || filter.length() == 0) {
+            data.getFilteredProducts().setPredicate(this::checkFilter);
+            data.getFilteredAllProducts().setPredicate(this::checkFilter);
+            data.getFilteredCategories().setPredicate(s -> true);
+
+//            if(productsStoreButton.isDisable()) {
+//                data.getFilteredProducts().setPredicate(this::checkFilter);
+//            } else if (productsAllButton.isDisable()) {
+//                data.getFilteredAllProducts().setPredicate(this::checkFilter);
+//            } else if (categoriesButton.isDisable()){
+//                data.getFilteredCategories().setPredicate(s -> true);
+//            } else {
+//
+//            }
+        }
+        else {
+            data.getFilteredProducts().setPredicate(s -> (s.getName().startsWith(filter) || s.getUpc().startsWith(filter)) && checkFilter(s));
+            data.getFilteredAllProducts().setPredicate(s -> s.getName().startsWith(filter) && checkFilter(s));
+            data.getFilteredCategories().setPredicate(s -> s.getName().startsWith(filter));
+
+//            if(productsStoreButton.isDisable()) {
+//                data.getFilteredProducts().setPredicate(s -> (s.getName().startsWith(filter) || s.getUpc().startsWith(filter)) && checkFilter(s));
+//            } else if (productsAllButton.isDisable()) {
+//                data.getFilteredAllProducts().setPredicate(s -> s.getName().startsWith(filter) && checkFilter(s));
+//            } else {
+//                data.getFilteredCategories().setPredicate(s -> s.getName().startsWith(filter));
+//            }
+        }
+    }
+    private boolean checkFilter(ProductItem item) {
+        boolean category = categoryFilter == null ? true : item.getCategory().getId() == categoryFilter.getId();
+        boolean sale;
+        if(saleFilter == SaleFilter.All) {sale = true;}
+        else if(saleFilter == SaleFilter.NonSale) {sale = item.getSaleUpc() == null || item.getSaleUpc().isEmpty();}
+        else {sale = item.getSaleUpc() != null && !item.getSaleUpc().isEmpty();}
+        return category && sale;
+    }
+
+    private boolean checkFilter(ProductInfo item) {
+        boolean category = categoryFilter == null ? true : item.getCategory().equals(categoryFilter.getName());
+        return category;
+    }
+
+    public void setFilters(CategoryItem category, SaleFilter sale) {
+        this.categoryFilter = category;
+        this.saleFilter = sale;
+        filterProducts(productSearchQuery.getText());
+    }
 
     private void initProductsTable() {
         TableViewLoader.initProductsTable(productsTable, product_upc,
-                product_name, product_amount, product_price);
-        productsTable.setItems(data.getProducts());
-    }
+                product_name, product_category, product_amount, product_price, product_prom);
+        productsTable.setItems(data.getFilteredProducts());
+        TableViewLoader.initAllProductsTable(allProductsTable, product_id,
+                product_name_all, category_all, product_description);
+        allProductsTable.setItems(data.getFilteredAllProducts());
+        TableViewLoader.initCategoryTable(categoryTable, category_id,
+                category_name);
+        categoryTable.setItems(data.getFilteredCategories());
 
-    private void initClientsTable() {
-        TableViewLoader.initClientsTable(clientsTable, client_id, client_name,
-                client_phone, client_address, client_discount);
-        clientsTable.setItems(data.getClients());
+        removeSearchProductTables();
+        productsStoreButtonOnAction(new ActionEvent());
     }
 
     private void initReceiptHistoryTable() {
@@ -130,10 +219,9 @@ public class CashierMenuViewController {
     }
 
     private void initReceiptTable() {
-        TableViewLoader.initProductsTable(receiptTable, receipt_upc, receipt_name, receipt_amount, receipt_price);
+        TableViewLoader.initProductsTable(receiptTable, receipt_upc, receipt_name, receipt_category, receipt_amount, receipt_price, receipt_prom);
         receiptTable.setItems(receiptItems);
         updateSum();
-
         removeFromReceiptButton.setDisable(true);
         receiptTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -171,7 +259,13 @@ public class CashierMenuViewController {
     @FXML
     public void openClients(ActionEvent event) {
         openMenu(searchClientsMenu, clientsButton);
-        initClientsTable();
+        try {
+            FXMLLoader loader = new FXMLLoader(ManagerPageView.class.getResource("/org/example/db_zlagoda/customers_list/customers-list-view.fxml"));
+            AnchorPane view = loader.load();
+            searchClientsMenu.getChildren().add(view);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -209,7 +303,6 @@ public class CashierMenuViewController {
     @FXML
     public void removeAllProducts(ActionEvent actionEvent) {
         for(ProductItem item : receiptItems) {
-//            removeFromReceipt(item);
             updateAmount(item, false);
         }
         receiptItems.clear();
@@ -218,7 +311,6 @@ public class CashierMenuViewController {
 
     @FXML
     public void deleteReceipt(ActionEvent actionEvent) {
-        //TODO: Add multiple receipt system
         clearReceipt();
     }
 
@@ -229,13 +321,13 @@ public class CashierMenuViewController {
 
     public void saveReceiptToDB() {
         try {
-            Receipt receipt = new Receipt(Date.valueOf(LocalDate.now()), receiptItems, CashierMenuViewController.user.getId(), receiptClientCard == null ? null : receiptClientCard.getCard_id());
+            Receipt receipt = new Receipt(Date.valueOf(LocalDate.now()), receiptItems, CashierMenuViewController.user.getId(), receiptClientCard);
             DatabaseManager.removeReceiptProducts(receiptItems);
             DatabaseManager.addReceiptToDB(receipt);
             receipt.setId(DatabaseManager.getCheckID(receipt));
             data.addReceipt(receipt);
             clearReceipt();
-            data.setProducts(DatabaseManager.getProductTableItems(database));
+            data.loadProducts();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -256,14 +348,17 @@ public class CashierMenuViewController {
         Stream.of(menus).forEach(x ->
                 cashierMenuContainer.getChildren().remove(x)
         );
+        searchClientsMenu.getChildren().clear();
+        System.out.println("client: "+searchClientsMenu.getChildren().size());
     }
 
     public void addReceiptProduct(ProductItem product, int amount) {
         addToReceiptList(new ProductItem(
                 product.getUpc(),
+                product.getSaleUpc(),
                 product.getName(),
                 amount,
-                product.getPrice()*amount));
+                product.getPrice()*amount, product.getCategory(), product.getPromotionalProduct()));
 
     }
 
@@ -458,5 +553,111 @@ public class CashierMenuViewController {
         list.removeAll(data.getReceipts());
         data.getReceipts().addAll(list);
         data.getReceipts().sort(Comparator.reverseOrder());
+    }
+
+    private void removeSearchProductTables() {
+        productsTablesContainer.getChildren().remove(productsTable);
+        productsTablesContainer.getChildren().remove(allProductsTable);
+        productsTablesContainer.getChildren().remove(categoryTable);
+        categoriesButton.setDisable(true);
+        productsStoreButton.setDisable(false);
+        productsAllButton.setDisable(false);
+        categoriesButton.setDisable(false);
+        productSearchQuery.clear();
+    }
+    @FXML
+    public void categoriesButtonOnAction(ActionEvent actionEvent) {
+        removeSearchProductTables();
+        productsTablesContainer.getChildren().add(categoryTable);
+        categoriesButton.setDisable(true);
+    }
+    @FXML
+    public void productsStoreButtonOnAction(ActionEvent actionEvent) {
+        removeSearchProductTables();
+        productsTablesContainer.getChildren().add(productsTable);
+        productsStoreButton.setDisable(true);
+    }
+    @FXML
+    public void productsButtonOnAction(ActionEvent actionEvent) {
+        removeSearchProductTables();
+        productsTablesContainer.getChildren().add(allProductsTable);
+        productsAllButton.setDisable(true);
+    }
+
+    @FXML
+    public void searchReceiptById(ActionEvent actionEvent) {
+        cashierMenuContainer.setDisable(true);
+
+        Label promptLabel = new Label("Введіть номер:");
+        TextField query = new TextField();
+        Button okButton = new Button("Пошук");
+        Button cancelButton = new Button("Скасувати");
+
+        okButton.setAlignment(Pos.CENTER);
+        okButton.setPrefWidth(175);
+        okButton.setDisable(true);
+
+        cancelButton.setAlignment(Pos.CENTER);
+        cancelButton.setPrefWidth(175);
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(20));
+        gridPane.setVgap(10);
+        gridPane.setHgap(10);
+        gridPane.setPrefWidth(350);
+        gridPane.setAlignment(Pos.BASELINE_CENTER);
+
+        gridPane.add(promptLabel, 0, 0);
+        gridPane.add(query, 1, 0);
+        gridPane.add(okButton, 0, 1);
+        gridPane.add(cancelButton, 1, 1);
+
+        Scene scene = new Scene(gridPane, 350, 100);
+        Stage promptStage = new Stage();
+        promptStage.setScene(scene);
+        promptStage.setTitle("");
+        promptStage.show();
+
+        query.textProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue != null && !newValue.isEmpty()) {
+                okButton.setDisable(false);
+            } else {
+                okButton.setDisable(true);
+            }
+
+        });
+
+        cancelButton.setOnAction(x -> {
+            promptStage.close();
+            cashierMenuContainer.setDisable(false);
+        });
+
+        okButton.setOnAction(x -> {
+            cancelButton.fire();
+            try {
+                showSelectedCheckInfo(query.getText());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private void showSelectedCheckInfo(String query) throws IOException {
+        Receipt receipt = DatabaseManager.getReceiptByID(database, query);
+        if(receipt == null || receipt.getProducts() == null || receipt.getProducts().isEmpty()) DatabaseManager.showError("Чек з номером "+query+" не знайдено");
+        else {
+            CheckViewController.receipt = receipt;
+            MenuChanger.changeMenu(MenuChanger.LoaderClass.CashierView,
+                    "check-search-view.fxml",
+                    "Огляд чеку");
+        }
+
+    }
+
+    @FXML
+    public void openFiltersMenu(ActionEvent actionEvent) throws IOException {
+        MenuChanger.changeMenu(MenuChanger.LoaderClass.CashierView,
+                "products-filters-view.fxml",
+                "Додати товар до чеку");
     }
 }

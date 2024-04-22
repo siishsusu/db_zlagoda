@@ -9,11 +9,27 @@ import java.sql.Date;
 
 public class TableViewLoader {
     public static void initProductsTable(TableView table, TableColumn upc,
-                                         TableColumn name, TableColumn amount, TableColumn price) {
+                                         TableColumn name, TableColumn category, TableColumn amount, TableColumn price, TableColumn prom) {
         upc.setCellValueFactory(new PropertyValueFactory<ProductItem, String>("upc"));
         name.setCellValueFactory(new PropertyValueFactory<ProductItem, String>("name"));
+        category.setCellValueFactory(new PropertyValueFactory<ProductItem, CategoryItem>("category"));
         amount.setCellValueFactory(new PropertyValueFactory<ProductItem, Integer>("amount"));
         price.setCellValueFactory(new PropertyValueFactory<ProductItem, Double>("price"));
+        prom.setCellValueFactory(new PropertyValueFactory<ProductItem, String>("onSale"));
+    }
+
+    public static void initAllProductsTable(TableView table, TableColumn id,
+                                         TableColumn name, TableColumn category, TableColumn description) {
+        id.setCellValueFactory(new PropertyValueFactory<ProductInfo, Integer>("id"));
+        category.setCellValueFactory(new PropertyValueFactory<ProductInfo, String>("category"));
+        name.setCellValueFactory(new PropertyValueFactory<ProductInfo, String>("name"));
+        description.setCellValueFactory(new PropertyValueFactory<ProductInfo, String>("description"));
+    }
+
+    public static void initCategoryTable(TableView table, TableColumn id,
+                                            TableColumn name) {
+        id.setCellValueFactory(new PropertyValueFactory<CategoryItem, Integer>("id"));
+        name.setCellValueFactory(new PropertyValueFactory<CategoryItem, String>("name"));
     }
 
     public static void initClientsTable(TableView table, TableColumn id,

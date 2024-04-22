@@ -11,24 +11,31 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.example.db_zlagoda.cashier_page.Views.CashierMenuView;
+import org.example.db_zlagoda.utils.MenuChanger;
+import org.example.db_zlagoda.utils.SaleFilter;
 import org.example.db_zlagoda.utils.tableview_tools.ProductItem;
 import org.example.db_zlagoda.utils.tableview_tools.TableViewLoader;
 
+import java.io.IOException;
+
 public class AddProductToReceiptMenuController {
     public Button selectAmountButton;
+    public TextArea productSearchQuery;
     private Stage stage;
     public TableView productsTable;
     public HBox viewContainer;
     public TableColumn product_upc;
     public TableColumn product_name;
+    public TableColumn product_category;
     public TableColumn product_amount;
     public TableColumn product_price;
+    public TableColumn product_prom;
     private int amountSelected = 1;
     private ProductItem productSelected;
 
     public void initialize() {
-        TableViewLoader.initProductsTable(productsTable, product_upc, product_name, product_amount, product_price);
-        productsTable.setItems(ControllerAccess.cashierMenuViewController.data.getProducts());
+        TableViewLoader.initProductsTable(productsTable, product_upc, product_name, product_category, product_amount, product_price, product_prom);
+        productsTable.setItems(ControllerAccess.cashierMenuViewController.data.getFilteredProducts());
         selectAmountButton.setDisable(true);
         productsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -37,6 +44,12 @@ public class AddProductToReceiptMenuController {
                 selectAmountButton.setDisable(true);
             }
         });
+
+        productSearchQuery.textProperty().addListener(_ ->{
+            ControllerAccess.cashierMenuViewController.filterProducts(productSearchQuery.textProperty().get());
+        });
+
+        ControllerAccess.cashierMenuViewController.filterProducts(productSearchQuery.textProperty().get());
     }
 
     private void initStage() {
@@ -106,6 +119,7 @@ public class AddProductToReceiptMenuController {
         cancelButton.setOnAction(x -> {
             promptStage.close();
             viewContainer.setDisable(false);
+            ControllerAccess.cashierMenuViewController.setFilters(null, SaleFilter.All);
         });
 
         okButton.setOnAction(x -> {
@@ -129,4 +143,10 @@ public class AddProductToReceiptMenuController {
     }
 
 
+    @FXML
+    public void openFiltersMenu(ActionEvent actionEvent) throws IOException {
+        MenuChanger.changeMenu(MenuChanger.LoaderClass.CashierView,
+                "products-filters-view.fxml",
+                "Додати товар до чеку");
+    }
 }
