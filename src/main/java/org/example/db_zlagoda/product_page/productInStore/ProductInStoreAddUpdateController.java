@@ -103,13 +103,13 @@ public class ProductInStoreAddUpdateController implements Initializable {
                                 Connection connectDB = connection.getConnection();
                                 Statement statement = connectDB.createStatement();
                                 // Перевірити кількість товарів
-                                ResultSet resultSet = statement.executeQuery("SELECT product_number " +
+                                ResultSet resultSet = statement.executeQuery("SELECT products_number " +
                                         "FROM store_product " +
                                         "WHERE id_product = '" + prodIDField.getText() + "' " +
                                         "AND UPC <> '" + UPC_prod + "' AND promotional_product = '0'");
 
                                 if (resultSet.next()) {
-                                    Integer number_of_products = Integer.parseInt(resultSet.getString("product_number"));
+                                    Integer number_of_products = Integer.parseInt(resultSet.getString("products_number"));
                                     if (number_of_products < (Integer.parseInt(numOfProdField.getText()) - Integer.parseInt(number_before_update))){
                                         textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
                                         textField.setTooltip(new Tooltip("Кількість акційного товару не повинна перевищувати кількість НЕакційного"));
@@ -248,45 +248,51 @@ public class ProductInStoreAddUpdateController implements Initializable {
                 updateQuery = "UPDATE store_product SET " +
                         "selling_price = '" + price + "', " +
                         "UPC_prom = '" + upcProm + "', " +
-                        "product_number = '" + numOfProd + "', " +
+                        "products_number = '" + numOfProd + "', " +
                         "promotional_product = '" + promotional + "' " +
                         "WHERE UPC = '" + UPC_prod + "'";
             } else {
                 // редагування, якщо немає акційного товару
                 updateQuery = "UPDATE store_product SET " +
                         "selling_price = '" + price + "', " +
-                        "product_number = '" + numOfProd + "', " +
+                        "products_number = '" + numOfProd + "', " +
                         "promotional_product = '" + promotional + "' " +
                         "WHERE UPC = '" + UPC_prod + "'";
             }
             statement.executeUpdate(updateQuery);
 
-            ResultSet numberOf_no_prom = statement.executeQuery("SELECT product_number, UPC " +
+            ResultSet numberOf_no_prom = statement.executeQuery("SELECT products_number, UPC, selling_price " +
                     "FROM store_product " +
                     "WHERE id_product = '" + prodIDField.getText() + "' " +
-                    "AND UPC <> '" + UPC_prod + "' AND promotional_product = '0'");
+                    "AND promotional_product = '0'");
 
             if (numberOf_no_prom.next()) {
-                Integer number_of_products = Integer.parseInt(numberOf_no_prom.getString("product_number"));
+                Integer number_of_products = Integer.parseInt(numberOf_no_prom.getString("products_number"));
                 Integer newProdNum = number_of_products - (Integer.parseInt(numOfProd) - Integer.parseInt(number_before_update));
+                Double newPrice = Double.parseDouble(numberOf_no_prom.getString("selling_price")) * 0.8;
 
-                if (newProdNum > 0){
-                    // оновлення кількості НЕакційного товару, при додаванні акційного
+                if (newProdNum > 0) {
                     updateQuery = "UPDATE store_product SET " +
-                            "product_number = '" + newProdNum + "' " +
+                            "products_number = '" + newProdNum + "' " +
                             "WHERE UPC = '" + numberOf_no_prom.getString("UPC") + "'";
                     statement.executeUpdate(updateQuery);
                 } else {
-                    // якщо кількість акційного товару == кількості неакційного, то неакційний товар видаляється з
-                    // магазину
-                    String deleteProd = "DELETE FROM store_product "+
+                    String deleteProd = "DELETE FROM store_product " +
                             "WHERE UPC = '" + numberOf_no_prom.getString("UPC") + "'";
                     statement.executeUpdate(deleteProd);
                 }
-            } else {
 
+                ResultSet promotionalProduct = statement.executeQuery("SELECT UPC " +
+                        "FROM store_product " +
+                        "WHERE id_product = '" + prodIDField.getText() + "' " +
+                        "AND promotional_product = '1'");
+                if (promotionalProduct.next()) {
+                    updateQuery = "UPDATE store_product SET " +
+                        "selling_price = '" + newPrice + "' " +
+                        "WHERE UPC = '" + promotionalProduct.getString("UPC") + "'";
+                statement.executeUpdate(updateQuery);
+                }
             }
-
             statement.close();
             connectDB.close();
 
@@ -463,6 +469,8 @@ public class ProductInStoreAddUpdateController implements Initializable {
                         promBox.setTooltip(new Tooltip("Цей товар вже належить базі"));
                         promBox.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
                         allFieldsFilled = false;
+
+                        // при оновленні ціни на НЕакційний товар проводити переоцінку цього товару
                     } else {
                         validProm = true;
                     }
@@ -537,12 +545,12 @@ public class ProductInStoreAddUpdateController implements Initializable {
             String addQuery = "";
             if (upcProm != null){
                 // додавання товару, якщо існує посилання на акційний товар
-                addQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, product_number, promotional_product) " +
+                addQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, products_number, promotional_product) " +
                         "VALUES ('" + upc + "', '" + upcProm + "', '" + id_prod + "', '" + price + "', '" + numOfProd + "', '" +
                         promotional + "')";
             } else {
                 // додавання товару, якщо НЕ існує посилання на акційний товар
-                addQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, product_number, promotional_product) " +
+                addQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, products_number, promotional_product) " +
                         "VALUES ('" + upc + "', null, '" + id_prod + "', '" + price + "', '" + numOfProd + "', '" +
                         promotional + "')";
             }
@@ -552,13 +560,13 @@ public class ProductInStoreAddUpdateController implements Initializable {
                 int n = Integer.parseInt(numOfProdField.getText());
 
                 // пошук кількості НЕакційних товарів, при додаванні акційного
-                ResultSet number_of_non_prom = statement.executeQuery("SELECT product_number, UPC " +
+                ResultSet number_of_non_prom = statement.executeQuery("SELECT products_number, UPC " +
                         "FROM store_product " +
                         "WHERE id_product = '" + id_prod + "' " +
                         "AND promotional_product = '0'");
                 int n_n_prom = 0;
                 if (number_of_non_prom.next()){
-                    n_n_prom = Integer.parseInt(number_of_non_prom.getString("product_number"));
+                    n_n_prom = Integer.parseInt(number_of_non_prom.getString("products_number"));
                 }
 
                 int newProdNum = n_n_prom - n;
@@ -566,7 +574,7 @@ public class ProductInStoreAddUpdateController implements Initializable {
                 if (newProdNum > 0){
                     // оновлення кількості НЕакційного товару, при додаванні акційного
                     String updateQuery = "UPDATE store_product SET " +
-                            "product_number = '" + newProdNum + "' " +
+                            "products_number = '" + newProdNum + "' " +
                             "WHERE UPC = '" + number_of_non_prom.getString("UPC") + "'";
                     statement.executeUpdate(updateQuery);
                 } else {
@@ -642,6 +650,7 @@ public class ProductInStoreAddUpdateController implements Initializable {
                         "(SELECT id_product FROM store_product WHERE promotional_product = '1') " +
                         "OR id_product NOT IN " +
                         "(SELECT id_product FROM store_product WHERE promotional_product = '0')");
+
         ArrayList<Integer> productIDs = new ArrayList<>();
         ArrayList<String> productNames = new ArrayList<>();
         while (products_information.next()) {
@@ -696,12 +705,12 @@ public class ProductInStoreAddUpdateController implements Initializable {
 
                     // пошук кількості НЕакційного товару за його id
                     ResultSet count = statement.executeQuery(
-                            "SELECT product_number FROM store_product " +
+                            "SELECT products_number FROM store_product " +
                                     "WHERE id_product = '" + prodIDField.getText() + "' " +
                                     "AND promotional_product = '0'"
                     );
                     if (count.next()) {
-                        int numOfProd = count.getInt("product_number");
+                        int numOfProd = count.getInt("products_number");
                         MAX_VALUE_COUNT = numOfProd;
                         numOfProdField.setText(String.valueOf(MAX_VALUE_COUNT));
                     }
@@ -737,6 +746,87 @@ public class ProductInStoreAddUpdateController implements Initializable {
         doUpdateButton.setOnAction(this::doAddButtonOnAction);
     }
 
+    public void revaluate() {
+        upcField.setDisable(true);
+        upcPromBox.setDisable(true);
+        prodIDField.setDisable(true);
+        prodNameField.setDisable(true);
+        promBox.setDisable(true);
+
+        number_before_update = numOfProdField.getText();
+        doUpdateButton.setText("Переоцінка товару");
+
+        infoLabel.setText("Оновлення ціни та/або кількісті товару");
+        textFieldList = Arrays.asList(priceField, numOfProdField);
+        doUpdateButton.setOnAction(this::doRevaluateButtonOnAction);
+    }
+
+    @FXML
+    public void doRevaluateButtonOnAction(ActionEvent event){
+        boolean allFieldsFilled = true;
+        for (TextField textField : textFieldList) {
+            if (textField.getText().isBlank()) {
+                textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+                textField.setTooltip(new Tooltip("Поле не повинно бути пустим"));
+                allFieldsFilled = false;
+            } else {
+                textField.setStyle("");
+
+                if (textField == priceField) {
+                    String text = textField.getText();
+                    if (text.matches("^\\d+(\\.\\d+)?$")) {
+
+                        int indexOfDecimal = text.indexOf('.');
+                        if (indexOfDecimal == -1) {
+                            if (text.length() <= 13) {
+                                textField.setStyle(null);
+                            } else {
+                                // Показати помилку про перевищення максимальної довжини
+                                textField.setTooltip(new Tooltip("Кількість символів не повинна перевищувати 13"));
+                                textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+                                allFieldsFilled = false;
+                            }
+                        } else {
+                            String digitsBeforeDecimal = text.substring(0, indexOfDecimal);
+                            String digitsAfterDecimal = text.substring(indexOfDecimal + 1);
+
+                            int afterDecimal = digitsAfterDecimal.length();
+                            int beforeDecimal = digitsBeforeDecimal.length();
+
+                            if (beforeDecimal <= (13 - afterDecimal) && afterDecimal <= 4) {
+                                textField.setStyle(null);
+                            } else {
+                                // Показати помилку про перевищення максимальної довжини перед або після коми
+                                textField.setTooltip(new Tooltip("Кількість символів не повинна перевищувати 13 (4 символи після коми)"));
+                                textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+                                allFieldsFilled = false;
+                            }
+                        }
+                    } else {
+                        // Показати помилку про некоректне числове значення
+                        textField.setTooltip(new Tooltip("Некоректне числове значення"));
+                        textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+                        allFieldsFilled = false;
+                    }
+                }
+            }
+
+            if (textField == numOfProdField) {
+                if (Integer.parseInt(textField.getText()) < Integer.parseInt(number_before_update)) {
+                    System.out.println(number_before_update);
+
+                    textField.setTooltip(new Tooltip("Кількість товарів після переоцінки не може бути меншою"));
+                    textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+                    allFieldsFilled = false;
+                }
+            }
+        }
+
+        if (allFieldsFilled) {
+            updateProduct();
+        }
+    }
+
     public void fillFields (String UPC, boolean add) throws IOException {
         if (add == false){
             this.UPC_prod = UPC;
@@ -749,7 +839,7 @@ public class ProductInStoreAddUpdateController implements Initializable {
             if (add == false){
                 ResultSet resultSet = statement.executeQuery("SELECT UPC, UPC_prom, " +
                         "store_product.id_product, product.product_name, " +
-                        "selling_price, product_number, promotional_product " +
+                        "selling_price, products_number, promotional_product " +
                         "FROM store_product " +
                         "INNER JOIN product " +
                         "ON product.id_product = store_product.id_product " +
@@ -761,7 +851,7 @@ public class ProductInStoreAddUpdateController implements Initializable {
                     prodIDField.setText(resultSet.getString("id_product"));
                     prodNameField.setText(resultSet.getString("product_name"));
                     priceField.setText(resultSet.getString("selling_price"));
-                    numOfProdField.setText(resultSet.getString("product_number"));
+                    numOfProdField.setText(resultSet.getString("products_number"));
                     //promField.setText(resultSet.getString("promotional_product"));
                     promBox.setValue(resultSet.getString("promotional_product"));
 

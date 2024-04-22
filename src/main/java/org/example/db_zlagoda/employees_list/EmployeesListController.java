@@ -17,29 +17,17 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType0Font;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.controlsfx.control.textfield.TextFields;
 import org.example.db_zlagoda.DatabaseConnection;
-import org.example.db_zlagoda.create_reports.PDFCreator;
 import org.example.db_zlagoda.update_employee_page.UpdateEmployeeController;
 
 import com.itextpdf.text.Document;
-import com.itextpdf.text.Rectangle;
-
-import com.itextpdf.text.Font;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 
-import javax.print.*;
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import java.awt.*;
 import java.io.*;
 import java.net.URL;
 import java.sql.Connection;

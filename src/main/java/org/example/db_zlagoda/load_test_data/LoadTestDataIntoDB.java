@@ -296,19 +296,19 @@ public class LoadTestDataIntoDB {
             Statement statement = connectDB.createStatement();
 
 
-            String insertQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, product_number, promotional_product) " +
+            String insertQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, products_number, promotional_product) " +
                     "VALUES ('" + 111111111 + "', null, '" + "300617681" + "', '" + 700 + "', '" + 15 + "', '" +
                     0 + "')";
 
             statement.executeUpdate(insertQuery);
 
-            insertQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, product_number, promotional_product) " +
+            insertQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, products_number, promotional_product) " +
                     "VALUES ('" + 22222222 + "', null, '" + "71435173" + "', '" + 200 + "', '" + 222 + "', '" +
                     1 + "')";
 
             statement.executeUpdate(insertQuery);
 
-            insertQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, product_number, promotional_product) " +
+            insertQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, products_number, promotional_product) " +
                     "VALUES ('" + 21212121 + "', null, '" + "71435173" + "', '" + 250 + "', '" + 13 + "', '" +
                     0 + "')";
 

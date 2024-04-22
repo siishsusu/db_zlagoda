@@ -39,7 +39,8 @@ public class ProductInStoreController implements Initializable {
     private Button updateButton, addButton, deleteButton,
             showInfoButton,
             allProdButton, promProdButton, no_promProdButton,
-            printButton;
+            printButton,
+            productRevaluationButton;
 
     @FXML
     private TableView<Object[]> productsInStoreTable;
@@ -103,6 +104,7 @@ public class ProductInStoreController implements Initializable {
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
         addButton.setDisable(false);
+        productRevaluationButton.setDisable(true);
 
 //        updateBox.setDisable(true);
 //        addBox.setDisable(true);
@@ -111,14 +113,61 @@ public class ProductInStoreController implements Initializable {
             if (newSelection == null) {
                 updateButton.setDisable(true);
                 deleteButton.setDisable(true);
+                productRevaluationButton.setDisable(true);
             } else {
                 updateButton.setDisable(false);
                 deleteButton.setDisable(false);
+                productRevaluationButton.setDisable(false);
 
                 Object[] selectedProduct = productsInStoreTable.getSelectionModel().getSelectedItem();
                 UPC_field.setText(selectedProduct[0].toString());
             }
         });
+    }
+
+    @FXML
+    public void productRevaluationButtonOnAction (ActionEvent event) throws IOException, SQLException {
+        // переоцінка товару
+        revaluate();
+    }
+
+    public void revaluate () throws IOException, SQLException {
+        Object[] selectedProduct = productsInStoreTable.getSelectionModel().getSelectedItem();
+        if (selectedProduct != null) {
+            String prod_upc = selectedProduct[0].toString();
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
+            Parent root = loader.load();
+            ProductInStoreAddUpdateController controller = loader.getController();
+            // змінити ціну можна лише в НЕакційного товару
+            if (selectedProduct[6].equals("0")) {
+                controller.fillFields(prod_upc, false);
+            } else {
+                DatabaseConnection connection = new DatabaseConnection();
+                Connection connectDB = connection.getConnection();
+                Statement statement = connectDB.createStatement();
+
+                // якщо обраний товар акційний, то відбувається пошук НЕакційного товару, що посилається на той
+                // самий продукт
+                ResultSet non_promUPC = statement.executeQuery(
+                        "SELECT UPC FROM store_product " +
+                                "WHERE id_product = '" + selectedProduct[2] + "' AND " +
+                                "promotional_product = '0'"
+                );
+                if (non_promUPC.next()){
+                    controller.fillFields(non_promUPC.getString("UPC"), false);
+                }
+            }
+            controller.revaluate();
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.show();
+            stage.setOnHidden(e -> {
+                productsInStoreTable.getItems().clear();
+                loadProductsInStore();
+            });
+        }
     }
 
     private void loadProductsInStore() {
@@ -132,17 +181,17 @@ public class ProductInStoreController implements Initializable {
                 product_store_information = statement.executeQuery(
                         "SELECT UPC, UPC_prom, store_product.id_product, " +
                                 "product.product_name, selling_price, " +
-                                "product_number, promotional_product " +
+                                "products_number, promotional_product " +
                                 "FROM store_product " +
                                 "INNER JOIN product " +
                                 "ON product.id_product = store_product.id_product " +
-                                "ORDER BY product_number;");
+                                "ORDER BY products_number;");
             } else if (SCENE == 1){
                 // 15. Отримати інформацію про усі акційні товари, відсортовані за назвою товару
                 product_store_information = statement.executeQuery(
                         "SELECT UPC, UPC_prom, store_product.id_product, " +
                                 "product.product_name, selling_price, " +
-                                "product_number, promotional_product " +
+                                "products_number, promotional_product " +
                                 "FROM store_product " +
                                 "INNER JOIN product " +
                                 "ON product.id_product = store_product.id_product " +
@@ -153,18 +202,18 @@ public class ProductInStoreController implements Initializable {
                 product_store_information = statement.executeQuery(
                         "SELECT UPC, UPC_prom, store_product.id_product, " +
                                 "product.product_name, selling_price, " +
-                                "product_number, promotional_product " +
+                                "products_number, promotional_product " +
                                 "FROM store_product " +
                                 "INNER JOIN product " +
                                 "ON product.id_product = store_product.id_product " +
                                 "WHERE promotional_product = '1'" +
-                                "ORDER BY product_number;");
+                                "ORDER BY products_number;");
             } else if (SCENE == 3){
                 // 16. Отримати інформацію про усі не акційні товари, відсортовані за назвою;
                 product_store_information = statement.executeQuery(
                         "SELECT UPC, UPC_prom, store_product.id_product, " +
                                 "product.product_name, selling_price, " +
-                                "product_number, promotional_product " +
+                                "products_number, promotional_product " +
                                 "FROM store_product " +
                                 "INNER JOIN product " +
                                 "ON product.id_product = store_product.id_product " +
@@ -175,12 +224,12 @@ public class ProductInStoreController implements Initializable {
                 product_store_information = statement.executeQuery(
                         "SELECT UPC, UPC_prom, store_product.id_product, " +
                                 "product.product_name, selling_price, " +
-                                "product_number, promotional_product " +
+                                "products_number, promotional_product " +
                                 "FROM store_product " +
                                 "INNER JOIN product " +
                                 "ON product.id_product = store_product.id_product " +
                                 "WHERE promotional_product = '0'" +
-                                "ORDER BY product_number;");
+                                "ORDER BY products_number;");
             }
 
             while (product_store_information.next()) {
@@ -190,7 +239,7 @@ public class ProductInStoreController implements Initializable {
                         product_store_information.getString("id_product"),
                         product_store_information.getString("product_name"),
                         product_store_information.getString("selling_price"),
-                        product_store_information.getString("product_number"),
+                        product_store_information.getString("products_number"),
                         product_store_information.getString("promotional_product")
                 };
                 productsInStoreTable.getItems().add(rowData);
@@ -254,8 +303,23 @@ public class ProductInStoreController implements Initializable {
                 Statement statement = connectDB.createStatement();
 
                 // 3. Видаляти дані про товари у магазині
-                String deleteProduct = "DELETE FROM store_product WHERE UPC = '" + upc_prod + "'";
-                statement.executeUpdate(deleteProduct);
+                String checkProductsQuery = "SELECT COUNT(*) FROM store_product " +
+                        "WHERE UPC = '" + upc_prod + "' AND UPC_prom IS NOT NULL";
+                ResultSet resultSet = statement.executeQuery(checkProductsQuery);
+                resultSet.next();
+                int productCount = resultSet.getInt(1);
+
+                if (productCount > 0) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Помилка");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Неможливо видалити неакційний товар, оскільки " +
+                            "на нього посилається акційний.");
+                    alert.showAndWait();
+                } else {
+                    String deleteProduct = "DELETE FROM store_product WHERE UPC = '" + upc_prod + "'";
+                    statement.executeUpdate(deleteProduct);
+                }
 
                 statement.close();
                 connectDB.close();
@@ -280,7 +344,7 @@ public class ProductInStoreController implements Initializable {
                 product_information = statement.executeQuery(
                         "SELECT UPC, UPC_prom, store_product.id_product, " +
                                 "product.product_name, product.characteristics, selling_price, " +
-                                "product_number, promotional_product " +
+                                "products_number, promotional_product " +
                                 "FROM store_product " +
                                 "INNER JOIN product " +
                                 "ON product.id_product = store_product.id_product " +
@@ -290,7 +354,7 @@ public class ProductInStoreController implements Initializable {
                 product_information = statement.executeQuery(
                         "SELECT UPC, UPC_prom, store_product.id_product, " +
                                 "product.product_name, product.characteristics, selling_price, " +
-                                "product_number, promotional_product " +
+                                "products_number, promotional_product " +
                                 "FROM store_product " +
                                 "INNER JOIN product " +
                                 "ON product.id_product = store_product.id_product " +
@@ -301,7 +365,7 @@ public class ProductInStoreController implements Initializable {
                 product_information = statement.executeQuery(
                         "SELECT UPC, UPC_prom, store_product.id_product, " +
                                 "product.product_name, product.characteristics, selling_price, " +
-                                "product_number, promotional_product " +
+                                "products_number, promotional_product " +
                                 "FROM store_product " +
                                 "INNER JOIN product " +
                                 "ON product.id_product = store_product.id_product " +
@@ -354,7 +418,7 @@ public class ProductInStoreController implements Initializable {
                             product_information.getString("product_name"),
                             product_information.getString("characteristics"),
                             product_information.getString("selling_price"),
-                            product_information.getString("product_number"),
+                            product_information.getString("products_number"),
                             product_information.getString("promotional_product")
                     ).forEach(data -> {
                         PdfPCell cell = new PdfPCell();
@@ -437,7 +501,7 @@ public class ProductInStoreController implements Initializable {
         try {
             ResultSet prod_store_info = executeQuery(
                     "SELECT product.product_name, product.characteristics, " +
-                            "selling_price, product_number " +
+                            "selling_price, products_number " +
                             "FROM store_product " +
                             "INNER JOIN product " +
                             "ON product.id_product = store_product.id_product " +
@@ -447,7 +511,7 @@ public class ProductInStoreController implements Initializable {
                 String name = prod_store_info.getString("product_name");
                 String characteristics = prod_store_info.getString("characteristics");
                 String price = prod_store_info.getString("selling_price");
-                String number = prod_store_info.getString("product_number");
+                String number = prod_store_info.getString("products_number");
 
                 Object[] rowData = {name, characteristics, price, number};
                 searchTable.getItems().add(rowData);

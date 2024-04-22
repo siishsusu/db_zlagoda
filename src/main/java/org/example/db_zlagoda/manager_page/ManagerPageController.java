@@ -34,7 +34,7 @@ public class ManagerPageController {
     @FXML
     private Button checksButton;
     public void checksButtonOnAction(ActionEvent event){
-//        loadView("/org/example/db_zlagoda/product_page/product-page-view.fxml");
+        loadView("/org/example/db_zlagoda/checks_page/checks-list-view.fxml");
     }
 
     private void loadView (String path){

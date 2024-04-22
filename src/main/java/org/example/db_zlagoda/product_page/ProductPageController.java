@@ -3,16 +3,19 @@ package org.example.db_zlagoda.product_page;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import org.example.db_zlagoda.DatabaseConnection;
 
 import java.io.IOException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.ResourceBundle;
 
-public class ProductPageController {
+public class ProductPageController implements Initializable {
     @FXML
     private AnchorPane mainContainer;
     @FXML
@@ -46,5 +49,10 @@ public class ProductPageController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        mainContainer.getStylesheets().add(getClass().getResource("/org/example/db_zlagoda/product_page/product-page-style.css").toExternalForm());
     }
 }

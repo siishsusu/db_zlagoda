@@ -8,9 +8,9 @@ public class DatabaseConnection {
     public Connection databaseLink;
 
     public Connection getConnection(){
-        String databaseName = "zlagoda_db",
+        String databaseName = "zzlagoda_db",
                 databaseUser = "root",
-                databasePassword = "qenze22KaNkKa",
+                databasePassword = "Yellow768215!",
                 link = "jdbc:mysql://localhost/" + databaseName;
 
         try {

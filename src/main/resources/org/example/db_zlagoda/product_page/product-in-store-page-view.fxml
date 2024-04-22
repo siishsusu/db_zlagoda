@@ -42,6 +42,7 @@
                         <Insets left="20.0" right="20.0" />
                      </HBox.margin>
                   </Button>
+                  <Button fx:id="productRevaluationButton" layoutX="600.0" layoutY="22.0" mnemonicParsing="false" onAction="#productRevaluationButtonOnAction" prefWidth="200.0" text="Переоцінити товар" />
                </children>
             </HBox>
             <TextField fx:id="UPC_field" layoutX="68.0" layoutY="583.0" prefHeight="26.0" prefWidth="669.0" promptText="Знайти ціну продажу товару, кількість наявних одиниць товару, назву та характеристики товару за UPC" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="580.0" />

@@ -185,11 +185,25 @@ public class ProductsController implements Initializable {
                 int productCount = resultSet.getInt(1);
 
                 if (productCount == 2) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Помилка");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Неможливо додати товар, оскільки він вже є в магазині (і неакційний, і акційний).");
-                    alert.showAndWait();
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
+                    Parent root = loader.load();
+                    ProductInStoreAddUpdateController controller = loader.getController();
+
+                    // якщо обраний товар акційний, то відбувається пошук НЕакційного товару, що посилається на той
+                    // самий продукт
+                    ResultSet non_promUPC = statement.executeQuery(
+                            "SELECT UPC FROM store_product " +
+                                    "WHERE id_product = '" + id_prod_selected + "' AND " +
+                                    "promotional_product = '0'"
+                    );
+                    if (non_promUPC.next()){
+                        controller.fillFields(non_promUPC.getString("UPC"), false);
+                    }
+                    controller.revaluate();
+
+                    Stage stage = new Stage();
+                    stage.setScene(new Scene(root));
+                    stage.show();
                 } else {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
                     Parent root = loader.load();

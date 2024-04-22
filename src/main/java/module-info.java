@@ -46,4 +46,6 @@ module org.example.db_zlagoda {
     opens org.example.db_zlagoda.product_page.productInStore to javafx.fxml;
     exports org.example.db_zlagoda.product_page.product;
     opens org.example.db_zlagoda.product_page.product to javafx.fxml;
+    exports org.example.db_zlagoda.checks_page;
+    opens org.example.db_zlagoda.checks_page to javafx.fxml;
 }
