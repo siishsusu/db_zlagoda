@@ -10,38 +10,43 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.login_page.LoginController">
-   <right>
-      <AnchorPane prefHeight="400.0" prefWidth="332.0" BorderPane.alignment="CENTER">
-         <children>
-            <ImageView fitHeight="77.0" fitWidth="139.0" layoutX="128.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@lock.jpg" />
-               </image>
-            </ImageView>
-            <Label fx:id="userNameLabel" layoutX="12.0" layoutY="172.0" text="Username :">
-               <font>
-                  <Font name="Times New Roman" size="18.0" />
-               </font>
-            </Label>
-            <Label fx:id="PasswordLabel" layoutX="14.0" layoutY="217.0" text="Password :">
-               <font>
-                  <Font name="Times New Roman" size="18.0" />
-               </font>
-            </Label>
-            <TextField fx:id="userNameTextField" layoutX="112.0" layoutY="167.0" prefHeight="26.0" prefWidth="173.0" promptText="Enter your username" />
-            <PasswordField fx:id="PasswordTextField" layoutX="112.0" layoutY="212.0" prefHeight="26.0" prefWidth="173.0" promptText="Enter your password" />
-            <Button fx:id="loginButton" layoutY="283.0" mnemonicParsing="false" onAction="#loginButtonOnAction" text="LOG IN" />
-            <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" layoutY="324.0" mnemonicParsing="false" onAction="#cancelButtonOnAction" text="CANCEL" />
-            <Label fx:id="invalidUserInfoError" alignment="CENTER" layoutX="13.0" layoutY="253.0" onDragDetected="#loginButtonOnAction" prefHeight="20.0" prefWidth="307.0" text=" " textFill="#f23b3b">
-               <font>
-                  <Font name="Times New Roman" size="12.0" />
-               </font>
-            </Label>
-         </children>
-      </AnchorPane>
-   </right>
-   <left>
-      <AnchorPane fx:id="leftPart" prefHeight="407.0" prefWidth="228.0" BorderPane.alignment="CENTER" />
-   </left>
-</BorderPane>
+
+<AnchorPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.db_zlagoda.login_page.LoginController">
+   <children>
+      <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
+         <right>
+            <AnchorPane prefHeight="400.0" prefWidth="332.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ImageView fitHeight="77.0" fitWidth="139.0" layoutX="128.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@lock.jpg" />
+                     </image>
+                  </ImageView>
+                  <Label fx:id="userNameLabel" layoutX="12.0" layoutY="172.0" text="Username :">
+                     <font>
+                        <Font name="Times New Roman" size="18.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="PasswordLabel" layoutX="14.0" layoutY="217.0" text="Password :">
+                     <font>
+                        <Font name="Times New Roman" size="18.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="userNameTextField" layoutX="112.0" layoutY="167.0" prefHeight="26.0" prefWidth="173.0" promptText="Enter your username" />
+                  <PasswordField fx:id="PasswordTextField" layoutX="112.0" layoutY="212.0" prefHeight="26.0" prefWidth="173.0" promptText="Enter your password" />
+                  <Button fx:id="loginButton" layoutY="283.0" mnemonicParsing="false" onAction="#loginButtonOnAction" text="LOG IN" />
+                  <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" layoutY="324.0" mnemonicParsing="false" onAction="#cancelButtonOnAction" text="CANCEL" />
+                  <Label fx:id="invalidUserInfoError" alignment="CENTER" layoutX="13.0" layoutY="253.0" onDragDetected="#loginButtonOnAction" prefHeight="20.0" prefWidth="307.0" text=" " textFill="#f23b3b">
+                     <font>
+                        <Font name="Times New Roman" size="12.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+         </right>
+         <left>
+            <AnchorPane fx:id="leftPart" prefHeight="407.0" prefWidth="228.0" BorderPane.alignment="CENTER" />
+         </left>
+      </BorderPane>
+   </children>
+</AnchorPane>

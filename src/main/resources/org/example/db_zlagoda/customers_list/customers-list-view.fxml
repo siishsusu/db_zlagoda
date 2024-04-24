@@ -32,7 +32,6 @@
             <Button fx:id="searchButton" layoutX="852.0" layoutY="14.0" mnemonicParsing="false" onAction="#searchButtonButtonButtonOnAction" prefHeight="25.0" prefWidth="200.0" text="Знайти" AnchorPane.rightAnchor="200.0" />
             <Button fx:id="clearFieldButton" layoutX="778.0" layoutY="14.0" mnemonicParsing="false" onAction="#clearFieldButtonButtonOnAction" prefHeight="25.0" prefWidth="10.0" text="X" AnchorPane.rightAnchor="405.0" />
             <Button fx:id="printButton" layoutX="1117.0" layoutY="14.0" mnemonicParsing="false" onAction="#printButtonOnAction" prefHeight="25.0" prefWidth="30.0" text="🖶" AnchorPane.rightAnchor="50.0" />
-            <Button fx:id="printThisCustomerButton" layoutX="1160.0" layoutY="265.0" mnemonicParsing="false" onAction="#printThisCustomerButtonOnAction" prefHeight="30.0" prefWidth="30.0" text="🖶" AnchorPane.bottomAnchor="270.0" AnchorPane.rightAnchor="9.0" AnchorPane.topAnchor="270.0" />
          </children>
       </AnchorPane>
       <BorderPane fx:id="updateAddBlock" layoutX="50.0" layoutY="577.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="570.0">

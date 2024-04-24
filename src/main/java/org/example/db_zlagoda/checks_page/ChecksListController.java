@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
+import static org.example.db_zlagoda.db_data.DatabaseManager_mm.*;
+
 public class ChecksListController implements Initializable {
     @FXML
     private Button showInfoButton, showAllChecksButton, checkInfoButton, printButton, deleteButton;
@@ -68,17 +70,8 @@ public class ChecksListController implements Initializable {
             Object[] selectedCheck = checkInfoTable.getSelectionModel().getSelectedItem();
             if (selectedCheck != null) {
                 String checkNum = selectedCheck[0].toString();
-
-                DatabaseConnection connection = new DatabaseConnection();
-                Connection connectDB = connection.getConnection();
-                Statement statement = connectDB.createStatement();
-
                 // 3. Видаляти дані про чеки
-                String deleteProduct = "DELETE FROM `check` WHERE check_number = '" + checkNum + "'";
-                statement.executeUpdate(deleteProduct);
-
-                statement.close();
-                connectDB.close();
+                deleteCheck(checkNum);
             }
 
             checkInfoTable.getItems().clear();
@@ -128,13 +121,8 @@ public class ChecksListController implements Initializable {
             Statement statement = connectDB.createStatement();
             // 20. Визначити загальну суму проданих товарів з чеків, створених усіма касиром за певний період часу;
             if (allEmployees){
-                ResultSet totalPrice_q = statement.executeQuery(
-                        "SELECT SUM(sum_total) AS total_sales_price " +
-                                "FROM `check` " +
-                                "WHERE print_date " +
-                                "BETWEEN '" + startDatePicker.getValue() + "' " +
-                                "AND '" + endDatePicker.getValue() + "'"
-                );
+                ResultSet totalPrice_q = totalSum_all(startDatePicker.getValue(), endDatePicker.getValue());
+
                 if(totalPrice_q.next()){
                     String price = totalPrice_q.getString("total_sales_price");
                     if (price == null){
@@ -145,14 +133,8 @@ public class ChecksListController implements Initializable {
                 }
             } else {
                 // 19. Визначити загальну суму проданих товарів з чеків, створених певним касиром за певний період часу;
-                ResultSet totalPrice_q = statement.executeQuery(
-                        "SELECT SUM(sum_total) AS total_sales_price " +
-                                "FROM `check` " +
-                                "WHERE id_employee = '" + employee_field.getText() + "' " +
-                                "AND print_date " +
-                                "BETWEEN '" + startDatePicker.getValue() + "' " +
-                                "AND '" + endDatePicker.getValue() + "'"
-                );
+                ResultSet totalPrice_q = totalSum_byCashier(employee_field.getText(), startDatePicker.getValue(), endDatePicker.getValue());
+
                 if(totalPrice_q.next()){
                     String price = totalPrice_q.getString("total_sales_price");
                     if (price == null){
@@ -170,18 +152,9 @@ public class ChecksListController implements Initializable {
     private void findAndSetTotalCount(){
         try {
             // 21. Визначити загальну кількість одиниць певного товару, проданого за певний період часу.
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-            ResultSet totalNumber_q = statement.executeQuery(
-                    "SELECT SUM(s.product_number) AS total_quantity_sold " +
-                            "FROM `check` c " +
-                            "INNER JOIN sale s " +
-                            "ON c.check_number = s.check_number " +
-                            "WHERE s.UPC = '" + employee_field.getText() + "' AND print_date " +
-                            "BETWEEN '" + startDatePicker.getValue() + "' " +
-                            "AND '" + endDatePicker.getValue() + "'"
-            );
+
+            ResultSet totalNumber_q = totalQuality(employee_field.getText(), startDatePicker.getValue(), endDatePicker.getValue());
+
             if(totalNumber_q.next()){
                 String quantitySold = totalNumber_q.getString("total_quantity_sold");
                 if (quantitySold == null){
@@ -433,113 +406,24 @@ public class ChecksListController implements Initializable {
 
     @FXML
     public void printButtonOnAction(ActionEvent event) throws IOException {
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-            ResultSet check_information = null;
-            // 4. Видруковувати звіти з інформацією про усіх чеки;
-            check_information = statement.executeQuery(
-                    "SELECT * FROM `check`;");
-
-            PrinterJob printerJob = PrinterJob.createPrinterJob();
-            if (printerJob != null && printerJob.showPrintDialog(null)) {
-                Document document = new Document();
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Зберегти PDF-файл");
-                fileChooser.getExtensionFilters().addAll(
-                        new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
-                );
-                File tempFile = fileChooser.showSaveDialog(null);
-                PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(tempFile));
-                document.open();
-
-                Font font = FontFactory.getFont("src/main/resources/fonts/Academy.ttf", BaseFont.IDENTITY_H, true);
-
-                font.setSize(20);
-                font.setStyle(Font.BOLD);
-                Paragraph title = new Paragraph("Звіт з інформацією про чеки", font);
-
-                title.setAlignment(Element.ALIGN_CENTER);
-                title.setSpacingAfter(10);
-                document.add(title);
-
-                PdfPTable table = new PdfPTable(6);
-                table.setWidthPercentage(100);
-
-                Stream.of("Номер чеку", "id працівника", "Номер карти клієнта", "Дата друку", "Загальна сума", "ПДВ")
-                        .forEach(columnTitle -> {
-                            PdfPCell header = new PdfPCell();
-                            header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                            header.setBorderWidth(1);
-                            header.setPhrase(new Phrase(columnTitle, font));
-                            table.addCell(header);
-                        });
-
-                font.setSize(12);
-                font.setStyle(Font.NORMAL);
-                while (check_information.next()) {
-                    Stream.of(
-                            check_information.getString("check_number"),
-                            check_information.getString("id_employee"),
-                            check_information.getString("card_number"),
-                            check_information.getString("print_date"),
-                            check_information.getString("sum_total"),
-                            check_information.getString("vat")
-                    ).forEach(data -> {
-                        PdfPCell cell = new PdfPCell();
-                        cell.setPhrase(new Phrase(data, font));
-                        table.addCell(cell);
-                    });
-                }
-
-                table.completeRow();
-                document.add(table);
-
-                document.close();
-                check_information.close();
-                printerJob.endJob();
-            } else {
-                System.out.println("Користувач відмінив друк.");
-            }
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-        } catch (com.itextpdf.text.DocumentException e) {
-            throw new RuntimeException(e);
-        }
+        printReportCheck();
     }
 
     private void loadTableInfo() throws SQLException {
         ResultSet checks_information = null;
-        DatabaseConnection connection = new DatabaseConnection();
-        Connection connectDB = connection.getConnection();
-        Statement statement = connectDB.createStatement();
         try {
             if (SCENE == 0){
                 // 18. Отримати інформацію про усі чеки, створені усіма касирами за певний період
                 // часу (з можливістю перегляду куплених товарів у цьому чеку, їх назва, к-сті та ціни);
-                checks_information = statement.executeQuery(
-                        "SELECT * " +
-                                "FROM `check` " +
-                                "WHERE print_date BETWEEN '" + startDatePicker.getValue() + "' " +
-                                "AND '" + endDatePicker.getValue() + "'");
+                checks_information = allChecks(startDatePicker.getValue(), endDatePicker.getValue());
             } else if (SCENE == 1){
                 // 17. Отримати інформацію про усі чеки, створені певним касиром за певний період
                 // часу (з можливістю перегляду куплених товарів у цьому чеку, їх назви, к-сті та ціни);
-                checks_information = statement.executeQuery(
-                        "SELECT * " +
-                                "FROM `check` " +
-                                "WHERE id_employee = '" + employee_field.getText() + "' " +
-                                "AND print_date BETWEEN '" + startDatePicker.getValue() + "' " +
-                                "AND '" + endDatePicker.getValue() + "'");
+                checks_information = checksByCashier(1, employee_field.getText(), startDatePicker.getValue(),
+                        endDatePicker.getValue());
             } else if (SCENE == 2){
-                checks_information = statement.executeQuery(
-                        "SELECT * " +
-                                "FROM `check` " +
-                                "INNER JOIN sale ON sale.check_number = `check`.check_number " +
-                                "WHERE UPC = '" + employee_field.getText() + "' " +
-                                "AND print_date BETWEEN '" + startDatePicker.getValue() + "' " +
-                                "AND '" + endDatePicker.getValue() + "'");
+                checks_information = checksByCashier(2, employee_field.getText(), startDatePicker.getValue(),
+                        endDatePicker.getValue());
             }
 
             while (checks_information.next()) {

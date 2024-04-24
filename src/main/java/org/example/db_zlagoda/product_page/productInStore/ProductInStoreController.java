@@ -25,12 +25,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
+
+import static org.example.db_zlagoda.db_data.DatabaseManager_mm.*;
 
 public class ProductInStoreController implements Initializable {
     int SCENE = 0;
@@ -117,7 +116,50 @@ public class ProductInStoreController implements Initializable {
             } else {
                 updateButton.setDisable(false);
                 deleteButton.setDisable(false);
-                productRevaluationButton.setDisable(false);
+                if (newSelection[6].toString().equals("0")){
+                    productRevaluationButton.setDisable(false);
+                } else if (newSelection[6].toString().equals("1")) {
+                    productRevaluationButton.setDisable(false);
+                    DatabaseConnection connection = new DatabaseConnection();
+                    Connection connectDB = connection.getConnection();
+                    try {
+                        String productId = newSelection[2].toString();
+
+                        String checkNonPromotionalQuery = "SELECT * FROM store_product " +
+                                "WHERE id_product = '" + productId + "' " +
+                                "AND promotional_product = '0'";
+
+                        Statement statement = connectDB.createStatement();
+                        ResultSet resultSet = statement.executeQuery(checkNonPromotionalQuery);
+                        if (resultSet.next()) {
+                            // Якщо є товар з вказаним id, який не є акційним, то активувати кнопку
+                            productRevaluationButton.setOnAction(productRevaluationButton.getOnAction());
+                        } else {
+                            // Якщо товару з вказаним id немає або він є акційним, то деактивувати кнопку
+                            try {
+                                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
+                                Parent root = loader.load();
+                                ProductInStoreAddUpdateController controller = loader.getController();
+                                controller.add(newSelection[2].toString());
+
+                                Stage stage = new Stage();
+                                stage.setScene(new Scene(root));
+                                stage.show();
+                                stage.setOnHidden(e -> {
+                                    productsInStoreTable.getItems().clear();
+                                    loadProductsInStore();
+                                });
+                            } catch (IOException e) {}
+                        }
+
+                        resultSet.close();
+                        statement.close();
+                        connectDB.close();
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
 
                 Object[] selectedProduct = productsInStoreTable.getSelectionModel().getSelectedItem();
                 UPC_field.setText(selectedProduct[0].toString());
@@ -136,12 +178,12 @@ public class ProductInStoreController implements Initializable {
         if (selectedProduct != null) {
             String prod_upc = selectedProduct[0].toString();
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-revaluate-view.fxml"));
             Parent root = loader.load();
-            ProductInStoreAddUpdateController controller = loader.getController();
+            ProductInStoreRevaluateController controller = loader.getController();
             // змінити ціну можна лише в НЕакційного товару
             if (selectedProduct[6].equals("0")) {
-                controller.fillFields(prod_upc, false);
+                controller.fillFields(prod_upc);
             } else {
                 DatabaseConnection connection = new DatabaseConnection();
                 Connection connectDB = connection.getConnection();
@@ -155,10 +197,9 @@ public class ProductInStoreController implements Initializable {
                                 "promotional_product = '0'"
                 );
                 if (non_promUPC.next()){
-                    controller.fillFields(non_promUPC.getString("UPC"), false);
+                    controller.fillFields(non_promUPC.getString("UPC"));
                 }
             }
-            controller.revaluate();
 
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
@@ -172,85 +213,77 @@ public class ProductInStoreController implements Initializable {
 
     private void loadProductsInStore() {
         try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
             ResultSet product_store_information = null;
             if (SCENE == 0){
                 // 10. Отримати інформацію про усі товари у магазині, відсортовані за кількістю;
-                product_store_information = statement.executeQuery(
-                        "SELECT UPC, UPC_prom, store_product.id_product, " +
-                                "product.product_name, selling_price, " +
-                                "products_number, promotional_product " +
-                                "FROM store_product " +
-                                "INNER JOIN product " +
-                                "ON product.id_product = store_product.id_product " +
-                                "ORDER BY products_number;");
+                product_store_information = getProductsInStoreInformation_quantity();
             } else if (SCENE == 1){
                 // 15. Отримати інформацію про усі акційні товари, відсортовані за назвою товару
-                product_store_information = statement.executeQuery(
-                        "SELECT UPC, UPC_prom, store_product.id_product, " +
-                                "product.product_name, selling_price, " +
-                                "products_number, promotional_product " +
-                                "FROM store_product " +
-                                "INNER JOIN product " +
-                                "ON product.id_product = store_product.id_product " +
-                                "WHERE promotional_product = '1'" +
-                                "ORDER BY product_name;");
+                product_store_information = getProductsInStoreInformation_prom_name();
             } else if (SCENE == 2){
                 // 15. Отримати інформацію про усі акційні товари, відсортовані за кількістю одиниць товару
-                product_store_information = statement.executeQuery(
-                        "SELECT UPC, UPC_prom, store_product.id_product, " +
-                                "product.product_name, selling_price, " +
-                                "products_number, promotional_product " +
-                                "FROM store_product " +
-                                "INNER JOIN product " +
-                                "ON product.id_product = store_product.id_product " +
-                                "WHERE promotional_product = '1'" +
-                                "ORDER BY products_number;");
+                product_store_information = getProductsInStoreInformation_prom_quantity();
             } else if (SCENE == 3){
                 // 16. Отримати інформацію про усі не акційні товари, відсортовані за назвою;
-                product_store_information = statement.executeQuery(
-                        "SELECT UPC, UPC_prom, store_product.id_product, " +
-                                "product.product_name, selling_price, " +
-                                "products_number, promotional_product " +
-                                "FROM store_product " +
-                                "INNER JOIN product " +
-                                "ON product.id_product = store_product.id_product " +
-                                "WHERE promotional_product = '0'" +
-                                "ORDER BY product_name;");
+                product_store_information = getProductsInStoreInformation_non_prom_name();
             } else if (SCENE == 4){
                 // 16. Отримати інформацію про усі не акційні товари, відсортовані за кількістю одиниць товару
-                product_store_information = statement.executeQuery(
-                        "SELECT UPC, UPC_prom, store_product.id_product, " +
-                                "product.product_name, selling_price, " +
-                                "products_number, promotional_product " +
-                                "FROM store_product " +
-                                "INNER JOIN product " +
-                                "ON product.id_product = store_product.id_product " +
-                                "WHERE promotional_product = '0'" +
-                                "ORDER BY products_number;");
+                product_store_information = getProductsInStoreInformation_non_prom_quantity();
             }
 
             while (product_store_information.next()) {
-                Object[] rowData = {
-                        product_store_information.getString("UPC"),
-                        product_store_information.getString("UPC_prom"),
-                        product_store_information.getString("id_product"),
-                        product_store_information.getString("product_name"),
-                        product_store_information.getString("selling_price"),
-                        product_store_information.getString("products_number"),
-                        product_store_information.getString("promotional_product")
-                };
-                productsInStoreTable.getItems().add(rowData);
+                addProductToTable(product_store_information);
             }
 
             product_store_information.close();
-            statement.close();
-            connectDB.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private void addProductToTable(ResultSet product_store_information) {
+        try {
+            String productsNumber = product_store_information.getString("products_number");
+            Object[] rowData = {
+                    product_store_information.getString("UPC"),
+                    product_store_information.getString("UPC_prom"),
+                    product_store_information.getString("id_product"),
+                    product_store_information.getString("product_name"),
+                    product_store_information.getString("selling_price"),
+                    product_store_information.getString("products_number"),
+                    product_store_information.getString("promotional_product")
+            };
+
+            productsInStoreTable.getItems().add(rowData);
+
+            TableColumn<Object[], String> productsNumberColumn = (TableColumn<Object[], String>) productsInStoreTable.getColumns().get(5);
+            productsNumberColumn.setCellValueFactory(cellData -> new SimpleStringProperty((String) cellData.getValue()[5]));
+
+            productsNumberColumn.setCellFactory(column -> new TableCell<Object[], String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setStyle("");
+                    } else {
+                        setText(item);
+                        TableRow<Object[]> row = getTableRow();
+                        if (row != null && row.getItem() != null) {
+                            String productsNumber = item;
+                            if ("0".equals(productsNumber)) {
+                                row.setStyle("-fx-background-color: red;");
+                            } else {
+                                row.setStyle("");
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @FXML
@@ -280,7 +313,7 @@ public class ProductInStoreController implements Initializable {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
         Parent root = loader.load();
         ProductInStoreAddUpdateController controller = loader.getController();
-        controller.add();
+        controller.add(null);
 
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
@@ -317,8 +350,7 @@ public class ProductInStoreController implements Initializable {
                             "на нього посилається акційний.");
                     alert.showAndWait();
                 } else {
-                    String deleteProduct = "DELETE FROM store_product WHERE UPC = '" + upc_prod + "'";
-                    statement.executeUpdate(deleteProduct);
+                    deleteProductInStore(upc_prod);
                 }
 
                 statement.close();
@@ -334,113 +366,7 @@ public class ProductInStoreController implements Initializable {
 
     @FXML
     public void printButtonOnAction(ActionEvent event) throws IOException {
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-            ResultSet product_information = null;
-            // 4. Видруковувати звіти з інформацією про усіх товари у магазині
-            if (SCENE == 0){
-                product_information = statement.executeQuery(
-                        "SELECT UPC, UPC_prom, store_product.id_product, " +
-                                "product.product_name, product.characteristics, selling_price, " +
-                                "products_number, promotional_product " +
-                                "FROM store_product " +
-                                "INNER JOIN product " +
-                                "ON product.id_product = store_product.id_product " +
-                                "ORDER BY product_name;");
-            } else if (SCENE == 1 || SCENE == 2){
-                // 4. Видруковувати звіти з інформацією про усі АКЦІЙНІ товари у магазині
-                product_information = statement.executeQuery(
-                        "SELECT UPC, UPC_prom, store_product.id_product, " +
-                                "product.product_name, product.characteristics, selling_price, " +
-                                "products_number, promotional_product " +
-                                "FROM store_product " +
-                                "INNER JOIN product " +
-                                "ON product.id_product = store_product.id_product " +
-                                "WHERE promotional_product = '1'" +
-                                "ORDER BY product_name;");
-            } else if (SCENE == 3 || SCENE == 4){
-                // 4. Видруковувати звіти з інформацією про усі НЕАКЦІЙНІ товари у магазині
-                product_information = statement.executeQuery(
-                        "SELECT UPC, UPC_prom, store_product.id_product, " +
-                                "product.product_name, product.characteristics, selling_price, " +
-                                "products_number, promotional_product " +
-                                "FROM store_product " +
-                                "INNER JOIN product " +
-                                "ON product.id_product = store_product.id_product " +
-                                "WHERE promotional_product = '0'" +
-                                "ORDER BY product_name;");
-            }
-
-            PrinterJob printerJob = PrinterJob.createPrinterJob();
-            if (printerJob != null && printerJob.showPrintDialog(null)) {
-                Document document = new Document();
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Зберегти PDF-файл");
-                fileChooser.getExtensionFilters().addAll(
-                        new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
-                );
-                File tempFile = fileChooser.showSaveDialog(null);
-                PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(tempFile));
-                document.open();
-
-                Font font = FontFactory.getFont("src/main/resources/fonts/Academy.ttf", BaseFont.IDENTITY_H, true);
-
-                font.setSize(20);
-                font.setStyle(Font.BOLD);
-                Paragraph title = new Paragraph("Звіт з інформацією про товари в магазині", font);
-
-                title.setAlignment(Element.ALIGN_CENTER);
-                title.setSpacingAfter(10);
-                document.add(title);
-
-                PdfPTable table = new PdfPTable(8);
-                table.setWidthPercentage(100);
-
-                Stream.of("UPC", "UPC акційного товару", "ID товару", "Назва товару", "Характеристики", "Ціна",
-                                "Кількість товару", "Акційний")
-                        .forEach(columnTitle -> {
-                            PdfPCell header = new PdfPCell();
-                            header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                            header.setBorderWidth(1);
-                            header.setPhrase(new Phrase(columnTitle, font));
-                            table.addCell(header);
-                        });
-
-                font.setSize(12);
-                font.setStyle(Font.NORMAL);
-                while (product_information.next()) {
-                    Stream.of(
-                            product_information.getString("UPC"),
-                            product_information.getString("UPC_prom"),
-                            product_information.getString("id_product"),
-                            product_information.getString("product_name"),
-                            product_information.getString("characteristics"),
-                            product_information.getString("selling_price"),
-                            product_information.getString("products_number"),
-                            product_information.getString("promotional_product")
-                    ).forEach(data -> {
-                        PdfPCell cell = new PdfPCell();
-                        cell.setPhrase(new Phrase(data, font));
-                        table.addCell(cell);
-                    });
-                }
-
-                table.completeRow();
-                document.add(table);
-
-                document.close();
-                product_information.close();
-                printerJob.endJob();
-            } else {
-                System.out.println("Користувач відмінив друк.");
-            }
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-        } catch (com.itextpdf.text.DocumentException e) {
-            throw new RuntimeException(e);
-        }
+        printReportProductInStore(SCENE);
     }
 
     @FXML
@@ -499,13 +425,7 @@ public class ProductInStoreController implements Initializable {
         // товару, назву та характеристики товару;
         searchTable.getItems().clear();
         try {
-            ResultSet prod_store_info = executeQuery(
-                    "SELECT product.product_name, product.characteristics, " +
-                            "selling_price, products_number " +
-                            "FROM store_product " +
-                            "INNER JOIN product " +
-                            "ON product.id_product = store_product.id_product " +
-                            "WHERE UPC = '" + UPC_field.getText() + "'");
+            ResultSet prod_store_info = searchByUPC(UPC_field.getText());
 
             while (prod_store_info.next()) {
                 String name = prod_store_info.getString("product_name");

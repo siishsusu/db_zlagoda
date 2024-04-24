@@ -8,7 +8,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-import org.example.db_zlagoda.DatabaseConnection;
 
 import java.net.URL;
 import java.security.MessageDigest;
@@ -17,8 +16,10 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.ResourceBundle;
+
+import static org.example.db_zlagoda.db_data.DatabaseManager_mm.checkUsernameAvailability;
+import static org.example.db_zlagoda.db_data.DatabaseManager_mm.insertEmployee;
 
 public class RegistrationController implements Initializable {
     @FXML
@@ -97,24 +98,14 @@ public class RegistrationController implements Initializable {
         });
 
         userNameField.textProperty().addListener((observable, oldValue, newValue) -> {
-            try{
-                DatabaseConnection connection = new DatabaseConnection();
-                Connection connectDB = connection.getConnection();
-                Statement statement = connectDB.createStatement();
-                // Перевірка унікальності username
-                ResultSet usernameCollision = statement.executeQuery(
-                        "SELECT * " +
-                                "FROM login_table " +
-                                "WHERE username = '" + newValue + "'");
-                if(usernameCollision.next()){
-                    userNameField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
-                }else{
-                    userNameField.setStyle(null);
-                }
-            }catch (SQLException e) {
-                e.printStackTrace();
+            boolean usernameAvailable = checkUsernameAvailability(newValue);
+            if (!usernameAvailable) {
+                userNameField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+            } else {
+                userNameField.setStyle(null);
             }
         });
+
     }
 
     @FXML
@@ -126,22 +117,12 @@ public class RegistrationController implements Initializable {
         String name = firstNameField.getText().toLowerCase();
         String surname = lastNameField.getText().toLowerCase();
         String username_gen = transliterateUkrainianToEnglish(name) + "_" + transliterateUkrainianToEnglish(surname);
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-            // Перевірка унікальності username
-            ResultSet usernameCollision = statement.executeQuery(
-                            "SELECT * " +
-                            "FROM login_table " +
-                            "WHERE username = '" + username_gen + "'");
-            if(usernameCollision.next()){
-                username_gen += random.nextInt(5000);
-            }else{
-                userNameField.setStyle(null);
-            }
-        }catch (SQLException e) {
-            e.printStackTrace();
+        // Перевірка унікальності username
+        boolean usernameAvailable = checkUsernameAvailability(username_gen);
+        if(!usernameAvailable){
+            username_gen += random.nextInt(5000);
+        }else{
+            userNameField.setStyle(null);
         }
         userNameField.setText(username_gen);
     }
@@ -178,14 +159,21 @@ public class RegistrationController implements Initializable {
 
     @FXML
     public void registerButtonOnAction(ActionEvent event) {
-        TextField textField;
-        Label textValidator;
-        Tooltip textValidatorTooltip;
+        boolean allFieldsValid = validateFields();
+        boolean allDatesSelectedAndValid = validateDates();
+        boolean roleSelected = !roleComBox.getSelectionModel().isEmpty();
+
+        if (allFieldsValid && allDatesSelectedAndValid && roleSelected) {
+            registerEmployee();
+        }
+    }
+
+    private boolean validateFields() {
         boolean allFieldsValid = true;
         for (Pair<TextField, Pair<Label, Tooltip>> field : requiredFields) {
-            textField = field.getKey();
-            textValidator = field.getValue().getKey();
-            textValidatorTooltip = field.getValue().getValue();
+            TextField textField = field.getKey();
+            Label textValidator = field.getValue().getKey();
+            Tooltip textValidatorTooltip = field.getValue().getValue();
 
             if (textField.getText().isBlank()) {
                 textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
@@ -193,115 +181,79 @@ public class RegistrationController implements Initializable {
             } else {
                 textField.setStyle(null);
 
-                if(textField == firstNameField || textField == lastNameField || textField == patronymicField || textField == cityField
-                        || textField == streetField){
-                    if(textField.getText().length() > 50){
+                if (textField == firstNameField || textField == lastNameField || textField == patronymicField ||
+                        textField == cityField || textField == streetField) {
+                    if (textField.getText().length() > 50) {
                         textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
                         textValidator.setText("This field must contain less than 50 characters.");
                         textValidatorTooltip.setText(textValidator.getText());
                         allFieldsValid = false;
-                    }else{
+                    } else {
                         textValidator.setText("");
                     }
                 }
 
-                if(textField == zipCodeField){
-                    if(textField.getText().length() > 9){
+                if (textField == zipCodeField) {
+                    if (textField.getText().length() > 9) {
                         textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
                         textValidator.setText("This field must contain less than 9 characters.");
                         textValidatorTooltip.setText(textValidator.getText());
                         allFieldsValid = false;
-                    }else{
+                    } else {
                         textValidator.setText("");
                     }
                 }
 
-                if(textField == phoneNumberField){
-                    if (textField.getText().length() == 13 && textField.getText().startsWith("+380")) {
-
-                    }else{
+                if (textField == phoneNumberField) {
+                    String phoneRegex = "^\\+380\\d{9}$";
+                    if (!textField.getText().matches(phoneRegex)) {
                         textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
-                        textValidator.setText("The phone number must contain 13 characters and start with \"+380\".");
+                        textValidator.setText("The phone number must start with \"+380\" and contain 13 digits.");
                         textValidatorTooltip.setText(textValidator.getText());
                         allFieldsValid = false;
+                    } else {
+                        textValidator.setText("");
                     }
                 }
 
                 if (textField == salaryField) {
                     String text = textField.getText();
-                    if (text.matches("^\\d+(\\.\\d+)?$")) {
-                        textValidator.setText("");
-
-                        int indexOfDecimal = text.indexOf('.');
-                        if (indexOfDecimal == -1) {
-                            if (text.length() <= 13) {
-                                textField.setStyle(null);
-                            } else {
-                                // Показати помилку про перевищення максимальної довжини
-                                textValidator.setText("The number of characters should not exceed 13.");
-                                textValidatorTooltip.setText(textValidator.getText());
-                                textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
-                                allFieldsValid = false;
-                            }
-                        } else {
-                            String digitsBeforeDecimal = text.substring(0, indexOfDecimal);
-                            String digitsAfterDecimal = text.substring(indexOfDecimal + 1);
-
-                            int afterDecimal = digitsAfterDecimal.length();
-                            int beforeDecimal = digitsBeforeDecimal.length();
-
-                            if (beforeDecimal <= (13 - afterDecimal) && afterDecimal <= 4) {
-                                textField.setStyle(null);
-                            } else {
-                                // Показати помилку про перевищення максимальної довжини перед або після коми
-                                textValidator.setText("The number of characters should not exceed 13 (4 decimal places).");
-                                textValidatorTooltip.setText(textValidator.getText());
-                                textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
-                                allFieldsValid = false;
-                            }
-                        }
-                    } else {
-                        // Показати помилку про некоректне числове значення
+                    if (!text.matches("^\\d+(\\.\\d+)?$")) {
                         textValidator.setText("Enter valid salary value.");
                         textValidatorTooltip.setText(textValidator.getText());
                         textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
                         allFieldsValid = false;
+                    } else if (text.length() > 13 || (text.contains(".") && text.substring(text.indexOf(".") + 1).length() > 4)) {
+                        textValidator.setText("The number of characters should not exceed 13 (4 decimal places).");
+                        textValidatorTooltip.setText(textValidator.getText());
+                        textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+                        allFieldsValid = false;
+                    } else {
+                        textField.setStyle(null);
+                        textValidator.setText("");
                     }
                 }
-
             }
-
         }
+        return allFieldsValid;
+    }
 
-        LocalDate today = LocalDate.now(), eighteenYearsAgo = today.minusYears(18);
+    private boolean validateDates() {
+        LocalDate today = LocalDate.now();
+        LocalDate eighteenYearsAgo = today.minusYears(18);
         boolean allDatesSelectedAndValid = true;
+
         for (DatePicker pick : requiredDates) {
             LocalDate selectedDate = pick.getValue();
-            if (selectedDate == null) {
+            if (selectedDate == null || (pick == birthDatePicker && selectedDate.isAfter(eighteenYearsAgo))) {
                 pick.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
                 allDatesSelectedAndValid = false;
             } else {
-                if (pick == birthDatePicker && selectedDate.isAfter(eighteenYearsAgo)) {
-                    pick.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
-                    allDatesSelectedAndValid = false;
-                } else {
-                    pick.setStyle(null);
-                }
+                pick.setStyle(null);
             }
         }
-        boolean roleSelected = !roleComBox.getSelectionModel().isEmpty();
-        if (!roleSelected) {
-            roleComBox.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
-            roleValidator.setText("Choose role");
-        } else {
-            roleComBox.setStyle(null);
-            roleValidator.setText("");
-        }
 
-        if (allFieldsValid && allDatesSelectedAndValid && roleSelected) {
-            registerEmployee();
-        }
-
+        return allDatesSelectedAndValid;
     }
 
     public static String hashPassword(String password){
@@ -323,10 +275,6 @@ public class RegistrationController implements Initializable {
     }
 
     public void registerEmployee(){
-//        clearDatabase();
-        DatabaseConnection connection = new DatabaseConnection();
-        Connection connectDB = connection.getConnection();
-
         String firstName = firstNameField.getText();
         String lastName = lastNameField.getText();
         String patronymic = patronymicField.getText();
@@ -344,44 +292,31 @@ public class RegistrationController implements Initializable {
         try {
             String id_gen = generateRandomId(10, false);
 
-            // 1.1. Додавати нові дані про працівників
-            String insertUserQuery = "INSERT INTO employee (id_employee, empl_surname, empl_name, empl_patronymic, empl_role, salary, " +
-                    "date_of_birth, date_of_start, phone_number, city, street, zip_code) " +
-                    "VALUES ('" + id_gen + "', '" + lastName + "', '" + firstName + "', '" + patronymic + "', '" + role + "', '" + salary + "', '" +
-                    Date.valueOf(birthDate) + "', '" + Date.valueOf(firstWorkDay) + "', '" + phoneNumber + "', '" + city + "', '" + street + "', '" +
-                    zipCode +  "')";
+            insertEmployee(id_gen, lastName, firstName, patronymic, role, salary, Date.valueOf(birthDate),
+                    Date.valueOf(firstWorkDay), phoneNumber, city, street, zipCode, username, password);
 
-            String insertLoginInfo = "INSERT INTO login_table (username, password, id_employee) " +
-                    "VALUES ('" + username + "', '" + password + "', '" + id_gen + "')";
-
-            Statement statement = connectDB.createStatement();
-            statement.executeUpdate(insertUserQuery);
-            statement.executeUpdate(insertLoginInfo);
-
-            firstNameField.clear();
-            lastNameField.clear();
-            patronymicField.clear();
-            roleComBox.getSelectionModel().clearSelection();
-            salaryField.clear();
-            birthDatePicker.setValue(null);
-            firstWorkDayPicker.setValue(null);
-            phoneNumberField.clear();
-            cityField.clear();
-            streetField.clear();
-            zipCodeField.clear();
-            userNameField.clear();
-            passportField.clear();
-            confPassportField.clear();
+            clearFields();
 
         } catch (Exception error) {
             error.printStackTrace();
-        } finally {
-            try {
-                connectDB.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
+    }
+
+    private void clearFields(){
+        firstNameField.clear();
+        lastNameField.clear();
+        patronymicField.clear();
+        roleComBox.getSelectionModel().clearSelection();
+        salaryField.clear();
+        birthDatePicker.setValue(null);
+        firstWorkDayPicker.setValue(null);
+        phoneNumberField.clear();
+        cityField.clear();
+        streetField.clear();
+        zipCodeField.clear();
+        userNameField.clear();
+        passportField.clear();
+        confPassportField.clear();
     }
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

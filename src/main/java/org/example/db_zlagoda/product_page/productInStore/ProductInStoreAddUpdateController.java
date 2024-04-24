@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import static org.example.db_zlagoda.db_data.DatabaseManager_mm.insertProductStore;
+import static org.example.db_zlagoda.db_data.DatabaseManager_mm.updateProdInStore;
 import static org.example.db_zlagoda.login_page.RegistrationController.generateRandomId;
 
 public class ProductInStoreAddUpdateController implements Initializable {
@@ -234,67 +236,45 @@ public class ProductInStoreAddUpdateController implements Initializable {
             String upcProm = (String) upcPromBox.getValue();
             String price = priceField.getText();
             String numOfProd = numOfProdField.getText();
-            //String promotional = promField.getText();
             String promotional = (String) promBox.getValue();
 
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-
             // 2. Редагувати дані про товари в магазині
-            String updateQuery;
-            if (upcProm != null){
-                // редагування, якщо є акційний товар
-                updateQuery = "UPDATE store_product SET " +
-                        "selling_price = '" + price + "', " +
-                        "UPC_prom = '" + upcProm + "', " +
-                        "products_number = '" + numOfProd + "', " +
-                        "promotional_product = '" + promotional + "' " +
-                        "WHERE UPC = '" + UPC_prod + "'";
-            } else {
-                // редагування, якщо немає акційного товару
-                updateQuery = "UPDATE store_product SET " +
-                        "selling_price = '" + price + "', " +
-                        "products_number = '" + numOfProd + "', " +
-                        "promotional_product = '" + promotional + "' " +
-                        "WHERE UPC = '" + UPC_prod + "'";
-            }
-            statement.executeUpdate(updateQuery);
-
-            ResultSet numberOf_no_prom = statement.executeQuery("SELECT products_number, UPC, selling_price " +
-                    "FROM store_product " +
-                    "WHERE id_product = '" + prodIDField.getText() + "' " +
-                    "AND promotional_product = '0'");
-
-            if (numberOf_no_prom.next()) {
-                Integer number_of_products = Integer.parseInt(numberOf_no_prom.getString("products_number"));
-                Integer newProdNum = number_of_products - (Integer.parseInt(numOfProd) - Integer.parseInt(number_before_update));
-                Double newPrice = Double.parseDouble(numberOf_no_prom.getString("selling_price")) * 0.8;
-
-                if (newProdNum > 0) {
-                    updateQuery = "UPDATE store_product SET " +
-                            "products_number = '" + newProdNum + "' " +
-                            "WHERE UPC = '" + numberOf_no_prom.getString("UPC") + "'";
-                    statement.executeUpdate(updateQuery);
-                } else {
-                    String deleteProd = "DELETE FROM store_product " +
-                            "WHERE UPC = '" + numberOf_no_prom.getString("UPC") + "'";
-                    statement.executeUpdate(deleteProd);
-                }
-
-                ResultSet promotionalProduct = statement.executeQuery("SELECT UPC " +
-                        "FROM store_product " +
-                        "WHERE id_product = '" + prodIDField.getText() + "' " +
-                        "AND promotional_product = '1'");
-                if (promotionalProduct.next()) {
-                    updateQuery = "UPDATE store_product SET " +
-                        "selling_price = '" + newPrice + "' " +
-                        "WHERE UPC = '" + promotionalProduct.getString("UPC") + "'";
-                statement.executeUpdate(updateQuery);
-                }
-            }
-            statement.close();
-            connectDB.close();
+            updateProdInStore(UPC_prod, price, upcProm, numOfProd, promotional);
+            System.out.println("was updated");
+//            ResultSet numberOf_no_prom = statement.executeQuery("SELECT products_number, UPC, selling_price " +
+//                    "FROM store_product " +
+//                    "WHERE id_product = '" + prodIDField.getText() + "' " +
+//                    "AND promotional_product = '0'");
+//
+//            if (numberOf_no_prom.next()) {
+//                Integer number_of_products = Integer.parseInt(numberOf_no_prom.getString("products_number"));
+//                Integer newProdNum = number_of_products - (Integer.parseInt(numOfProd) - Integer.parseInt(number_before_update));
+//                Double newPrice = Double.parseDouble(numberOf_no_prom.getString("selling_price")) * 0.8;
+//
+//                if (newProdNum > 0) {
+//                    updateQuery = "UPDATE store_product SET " +
+//                            "products_number = '" + newProdNum + "' " +
+//                            "WHERE UPC = '" + numberOf_no_prom.getString("UPC") + "'";
+//                    statement.executeUpdate(updateQuery);
+//                } else {
+//                    String deleteProd = "DELETE FROM store_product " +
+//                            "WHERE UPC = '" + numberOf_no_prom.getString("UPC") + "'";
+//                    statement.executeUpdate(deleteProd);
+//                }
+//
+//                ResultSet promotionalProduct = statement.executeQuery("SELECT UPC " +
+//                        "FROM store_product " +
+//                        "WHERE id_product = '" + prodIDField.getText() + "' " +
+//                        "AND promotional_product = '1'");
+//                if (promotionalProduct.next()) {
+//                    updateQuery = "UPDATE store_product SET " +
+//                        "selling_price = '" + newPrice + "' " +
+//                        "WHERE UPC = '" + promotionalProduct.getString("UPC") + "'";
+//                statement.executeUpdate(updateQuery);
+//                }
+//            }
+//            statement.close();
+//            connectDB.close();
 
             Stage stage = (Stage) upcField.getScene().getWindow();
             stage.close();
@@ -527,85 +507,16 @@ public class ProductInStoreAddUpdateController implements Initializable {
         }
     }
 
-    private void addProduct(boolean promotionalProduct) {
+    public void addProduct(boolean promotionalProduct) {
         try {
             String upc = upcField.getText();
             String upcProm = (String) upcPromBox.getValue();
-            String id_prod = prodIDField.getText();
+            String idProd = prodIDField.getText();
             String price = priceField.getText();
             String numOfProd = numOfProdField.getText();
-         //   String promotional = promField.getText();
             String promotional = (String) promBox.getValue();
 
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-
-            // 1. Додавати дані про товари в магазині
-            String addQuery = "";
-            if (upcProm != null){
-                // додавання товару, якщо існує посилання на акційний товар
-                addQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, products_number, promotional_product) " +
-                        "VALUES ('" + upc + "', '" + upcProm + "', '" + id_prod + "', '" + price + "', '" + numOfProd + "', '" +
-                        promotional + "')";
-            } else {
-                // додавання товару, якщо НЕ існує посилання на акційний товар
-                addQuery = "INSERT INTO store_product (UPC, UPC_prom, id_product, selling_price, products_number, promotional_product) " +
-                        "VALUES ('" + upc + "', null, '" + id_prod + "', '" + price + "', '" + numOfProd + "', '" +
-                        promotional + "')";
-            }
-            statement.executeUpdate(addQuery);
-
-            if (promotional.equals("1")){
-                int n = Integer.parseInt(numOfProdField.getText());
-
-                // пошук кількості НЕакційних товарів, при додаванні акційного
-                ResultSet number_of_non_prom = statement.executeQuery("SELECT products_number, UPC " +
-                        "FROM store_product " +
-                        "WHERE id_product = '" + id_prod + "' " +
-                        "AND promotional_product = '0'");
-                int n_n_prom = 0;
-                if (number_of_non_prom.next()){
-                    n_n_prom = Integer.parseInt(number_of_non_prom.getString("products_number"));
-                }
-
-                int newProdNum = n_n_prom - n;
-
-                if (newProdNum > 0){
-                    // оновлення кількості НЕакційного товару, при додаванні акційного
-                    String updateQuery = "UPDATE store_product SET " +
-                            "products_number = '" + newProdNum + "' " +
-                            "WHERE UPC = '" + number_of_non_prom.getString("UPC") + "'";
-                    statement.executeUpdate(updateQuery);
-                } else {
-                    // якщо кількість акційного товару == кількості неакційного, то неакційний товар видаляється з
-                    // магазину
-                    String deleteProd = "DELETE FROM store_product "+
-                            "WHERE UPC = '" + number_of_non_prom.getString("UPC") + "'";
-                    statement.executeUpdate(deleteProd);
-                }
-            }
-
-            if (promotionalProduct){
-                // пошук UPC неакційного товару, при додаванні акційного
-                ResultSet not_prom = statement.executeQuery(
-                        "SELECT UPC " +
-                                "FROM store_product " +
-                                "WHERE id_product = '" + prodIDField.getText() + "' " +
-                                "AND UPC <> '" + upcField.getText() + "' AND promotional_product = '0'"
-                );
-                if(not_prom.next()) {
-                    String upc_this = not_prom.getString("UPC");
-                    // оновлення UPC_prom поля в бд (при додаванні акційного товару (неакційний уже знаходиться в бд))
-                    String updateQuery = "UPDATE store_product SET " +
-                            "UPC_prom = '" + upcField.getText() + "' " +
-                            "WHERE UPC = '" + upc_this + "'";
-                    statement.executeUpdate(updateQuery);
-                }
-            }
-
-            statement.close();
-            connectDB.close();
+            insertProductStore(upc, upcProm, idProd, price, numOfProd, promotional);
 
             Stage stage = (Stage) upcField.getScene().getWindow();
             stage.close();
@@ -629,7 +540,7 @@ public class ProductInStoreAddUpdateController implements Initializable {
         doUpdateButton.setOnAction(this::doUpdateButtonOnAction);
     }
 
-    public void add() throws SQLException {
+    public void add(String id_product) throws SQLException {
         upcField.setDisable(false);
         prodIDField.setDisable(false);
         prodNameField.setDisable(false);
@@ -744,6 +655,10 @@ public class ProductInStoreAddUpdateController implements Initializable {
       //  textFieldList = Arrays.asList(upcField, prodIDField, prodNameField, priceField, numOfProdField, promField);
         textFieldList = Arrays.asList(upcField, prodIDField, prodNameField, priceField, numOfProdField);
         doUpdateButton.setOnAction(this::doAddButtonOnAction);
+
+        if(id_product != null){
+            prodIDField.setText(id_product);
+        }
     }
 
     public void revaluate() {

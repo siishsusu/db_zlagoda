@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
+import static org.example.db_zlagoda.db_data.DatabaseManager_mm.*;
 import static org.example.db_zlagoda.login_page.RegistrationController.generateRandomId;
 
 public class ProductsController implements Initializable {
@@ -208,7 +209,7 @@ public class ProductsController implements Initializable {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
                     Parent root = loader.load();
                     ProductInStoreAddUpdateController controller = loader.getController();
-                    controller.add();
+                    controller.add(null);
                     controller.fillFields(id_prod_selected, true);
 
                     Stage stage = new Stage();
@@ -293,20 +294,13 @@ public class ProductsController implements Initializable {
             String nameProd = productNameField.getText();
             String characteristicProd = productCharacteristicsField.getText();
 
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-
             // 1. Додавати нові дані про товари
             String id_gen = generateRandomId(9, true);
+            insertProduct(id_gen,
+                    getCategoryNumber(categoryNamesBox.getValue().toString()),
+                    nameProd,
+                    characteristicProd);
 
-            String insertProdQuery = "INSERT INTO product (id_product, category_number, product_name, characteristics) " +
-                    "VALUES ('" + id_gen + "', '" + getCategoryNumber(categoryNamesBox.getValue().toString()) + "', '" + nameProd + "', '" + characteristicProd +  "')";
-
-            statement.executeUpdate(insertProdQuery);
-
-            statement.close();
-            connectDB.close();
             updateAddContainer.setVisible(false);
 
             addButton.setDisable(false);
@@ -369,7 +363,6 @@ public class ProductsController implements Initializable {
                 Statement statement = connectDB.createStatement();
 
                 // 3. Видаляти дані про товари
-
                 String checkProductsQuery = "SELECT COUNT(*) FROM store_product WHERE id_product = '" + id_prod + "'";
                 ResultSet resultSet = statement.executeQuery(checkProductsQuery);
                 resultSet.next();
@@ -382,16 +375,11 @@ public class ProductsController implements Initializable {
                     alert.setContentText("Неможливо видалити товар, оскільки він є в магазині.");
                     alert.showAndWait();
                 } else {
-                    String deleteProduct = "DELETE FROM product WHERE id_product = '" + id_prod + "'";
-                    statement.executeUpdate(deleteProduct);
+                    deleteProduct(id_prod);
 
                     clearTable();
                     loadProductsData();
                 }
-
-                resultSet.close();
-                statement.close();
-                connectDB.close();
 
                 clearTable();
                 loadProductsData();
@@ -497,20 +485,9 @@ public class ProductsController implements Initializable {
             String nameProd = productNameField.getText();
             String characteristicProd = productCharacteristicsField.getText();
 
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-
             // 2. Редагувати дані про товари
-            String updateQuery = "UPDATE product SET " +
-                    "category_number = '" + getCategoryNumber(categoryNamesBox.getValue().toString()) + "', " +
-                    "product_name = '" + nameProd + "', " +
-                    "characteristics = '" + characteristicProd + "' " +
-                    "WHERE id_product = '" + prod_id + "'";
-            statement.executeUpdate(updateQuery);
+            updateProd(prod_id, getCategoryNumber(categoryNamesBox.getValue().toString()), nameProd, characteristicProd);
 
-            statement.close();
-            connectDB.close();
             updateAddContainer.setVisible(false);
 
             addButton.setDisable(false);
@@ -574,15 +551,7 @@ public class ProductsController implements Initializable {
             ResultSet product_information = null;
 
             // 13. Здійснити пошук усіх товарів, що належать певній категорії, відсортованих за назвою;
-            product_information = statement.executeQuery(
-                    "SELECT product.id_product, product.category_number, " +
-                            "category.category_name, product.product_name, " +
-                            "product.characteristics " +
-                            "FROM product " +
-                            "INNER JOIN category " +
-                            "ON category.category_number = product.category_number " +
-                            "WHERE category." + option + " = '" + categoryField.getText() + "'" +
-                            "ORDER BY product.product_name;");
+            product_information = searchByCategory(option, categoryField.getText());
 
             while (product_information.next()) {
                 Object[] rowData = {
@@ -612,23 +581,9 @@ public class ProductsController implements Initializable {
             ResultSet product_information = null;
             if(SCREEN == 0){
                 // 9. Отримати інформацію про усі товари, відсортовані за назвою;
-                product_information = statement.executeQuery(
-                        "SELECT product.id_product, product.category_number, " +
-                                "category.category_name, product.product_name, " +
-                                "product.characteristics " +
-                                "FROM product " +
-                                "INNER JOIN category " +
-                                "ON category.category_number = product.category_number " +
-                                "ORDER BY product.product_name;");
+                product_information = getProductsInformation_name();
             }else if(SCREEN == 1){
-                // 10. Отримати інформацію про усі товари у магазині, відсортовані за кількістю;
-                product_information = statement.executeQuery(
-                        "SELECT DISTINCT product.id_product, product.category_number, category.category_name, " +
-                                "product.product_name, product.characteristics " +
-                                "FROM product " +
-                                "INNER JOIN category ON category.category_number = product.category_number " +
-                                "INNER JOIN store_product ON store_product.id_product = product.id_product " +
-                                "ORDER BY product.product_name;");
+                product_information = getProductsInformation_quantity();
             }
 
             while (product_information.next()) {
@@ -654,83 +609,6 @@ public class ProductsController implements Initializable {
     @FXML
     private void printButtonOnAction(ActionEvent event) {
         // 4. Видруковувати звіти з інформацією про усіх товари
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-            ResultSet product_information = null;
-            product_information = statement.executeQuery(
-                    "SELECT product.id_product, product.category_number, " +
-                            "category.category_name, product.product_name, " +
-                            "product.characteristics " +
-                            "FROM product " +
-                            "INNER JOIN category " +
-                            "ON category.category_number = product.category_number " +
-                            "ORDER BY product.product_name;");
-
-            PrinterJob printerJob = PrinterJob.createPrinterJob();
-            if (printerJob != null && printerJob.showPrintDialog(null)) {
-                Document document = new Document();
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Зберегти PDF-файл");
-                fileChooser.getExtensionFilters().addAll(
-                        new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
-                );
-                File tempFile = fileChooser.showSaveDialog(null);
-                PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(tempFile));
-                document.open();
-
-                Font font = FontFactory.getFont("src/main/resources/fonts/Academy.ttf", BaseFont.IDENTITY_H, true);
-
-                font.setSize(20);
-                font.setStyle(Font.BOLD);
-                Paragraph title = new Paragraph("Звіт з інформацією про товари", font);
-
-                title.setAlignment(Element.ALIGN_CENTER);
-                title.setSpacingAfter(10);
-                document.add(title);
-
-                PdfPTable table = new PdfPTable(5);
-                table.setWidthPercentage(100);
-
-                Stream.of("ID", "Номер категорії", "Назва категорії", "Назва товару", "Характеристики")
-                        .forEach(columnTitle -> {
-                            PdfPCell header = new PdfPCell();
-                            header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                            header.setBorderWidth(1);
-                            header.setPhrase(new Phrase(columnTitle, font));
-                            table.addCell(header);
-                        });
-
-                font.setSize(12);
-                font.setStyle(Font.NORMAL);
-                while (product_information.next()) {
-                    Stream.of(
-                            product_information.getString("id_product"),
-                            product_information.getString("category_number"),
-                            product_information.getString("category_name"),
-                            product_information.getString("product_name"),
-                            product_information.getString("characteristics")
-                    ).forEach(data -> {
-                        PdfPCell cell = new PdfPCell();
-                        cell.setPhrase(new Phrase(data, font));
-                        table.addCell(cell);
-                    });
-                }
-
-                table.completeRow();
-                document.add(table);
-
-                document.close();
-                product_information.close();
-                printerJob.endJob();
-            } else {
-                System.out.println("Користувач відмінив друк.");
-            }
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-        } catch (com.itextpdf.text.DocumentException e) {
-            throw new RuntimeException(e);
-        }
+        printReportProduct();
     }
 }

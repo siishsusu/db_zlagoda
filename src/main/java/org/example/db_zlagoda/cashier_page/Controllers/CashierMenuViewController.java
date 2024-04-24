@@ -1,5 +1,6 @@
 package org.example.db_zlagoda.cashier_page.Controllers;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -20,6 +21,7 @@ import org.example.db_zlagoda.DatabaseConnection;
 import org.example.db_zlagoda.cashier_page.Models.SessionData;
 import org.example.db_zlagoda.cashier_page.Models.UserData;
 import org.example.db_zlagoda.db_data.DatabaseManager;
+import org.example.db_zlagoda.login_page.LoginPage;
 import org.example.db_zlagoda.manager_page.ManagerPageView;
 import org.example.db_zlagoda.utils.Exceptions.NegativeAmountException;
 import org.example.db_zlagoda.utils.SaleFilter;
@@ -659,5 +661,20 @@ public class CashierMenuViewController {
         MenuChanger.changeMenu(MenuChanger.LoaderClass.CashierView,
                 "products-filters-view.fxml",
                 "Додати товар до чеку");
+    }
+
+    @FXML
+    private Button leaveButton;
+    public void leaveButtonOnAction(ActionEvent event) {
+        Stage stage = (Stage) leaveButton.getScene().getWindow();
+        stage.close();
+
+        Platform.runLater(() -> {
+            try {
+                new LoginPage().start(new Stage());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

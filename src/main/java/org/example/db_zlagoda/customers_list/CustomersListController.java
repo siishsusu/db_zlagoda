@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
+import static org.example.db_zlagoda.db_data.DatabaseManager_mm.*;
 import static org.example.db_zlagoda.login_page.RegistrationController.generateRandomId;
 
 public class CustomersListController implements Initializable {
@@ -115,26 +116,11 @@ public class CustomersListController implements Initializable {
             ResultSet cust_information = null;
             // 7. Отримати інформацію про усіх постійних клієнтів, відсортованих за прізвищем;
             if (allData == true){
-                cust_information = executeQuery(
-                        "SELECT card_number, " +
-                                "CONCAT(cust_surname, ' ', cust_name, ' ', cust_patronymic) AS ПІБ, " +
-                                "phone_number, " +
-                                "CONCAT('м. ', city, ', вул. ', street, ', поштовий індекс : ', zip_code, percent) AS Адреса, " +
-                                "percent " +
-                                "FROM customer_card " +
-                                "ORDER BY cust_surname");
+                cust_information = getCustomersInformation();
             } else {
                 // 12. Отримати інформацію про усіх постійних клієнтів, що мають карту клієнта із певним
                 // відсотком, посортованих за прізвищем;
-                cust_information = executeQuery(
-                        "SELECT card_number, " +
-                                "CONCAT(cust_surname, ' ', cust_name, ' ', cust_patronymic) AS ПІБ, " +
-                                "phone_number, " +
-                                "CONCAT('м. ', city, ', вул. ', street, ', поштовий індекс : ', zip_code, percent) AS Адреса, " +
-                                "percent " +
-                                "FROM customer_card " +
-                                "WHERE percent = " + "'" + searchPercentField.getText() + "'" +
-                                "ORDER BY cust_surname");
+                cust_information = getCustomersInformation_byPercent(searchPercentField.getText());
             }
 
             while (cust_information.next()) {
@@ -156,86 +142,7 @@ public class CustomersListController implements Initializable {
 
     @FXML
     public void printButtonOnAction(ActionEvent event) throws IOException {
-        try {
-            ResultSet customers_information = null;
-            // 4. Видруковувати звіти з інформацією про усіх постійних клієнтів
-            customers_information = executeQuery(
-                    "SELECT card_number, " +
-                            "CONCAT(cust_surname, ' ', cust_name, ' ', cust_patronymic) AS PIB, " +
-                            "phone_number, " +
-                            "CONCAT('м. ', city, ' вул. ', street, ' поштовий індекс: ', zip_code) AS address, " +
-                            "percent " +
-                            "FROM customer_card;");
-
-            PrinterJob printerJob = PrinterJob.createPrinterJob();
-            if (printerJob != null && printerJob.showPrintDialog(null)) {
-                Document document = new Document();
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Зберегти PDF-файл");
-                fileChooser.getExtensionFilters().addAll(
-                        new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
-                );
-                File tempFile = fileChooser.showSaveDialog(null);
-                PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(tempFile));
-                document.open();
-
-                Font font = FontFactory.getFont("src/main/resources/fonts/Academy.ttf", BaseFont.IDENTITY_H, true);
-
-                font.setSize(20);
-                font.setStyle(Font.BOLD);
-                Paragraph title = new Paragraph("Звіт з інформацією про постійних клієнтів", font);
-
-                title.setAlignment(Element.ALIGN_CENTER);
-                title.setSpacingAfter(10);
-                document.add(title);
-
-                PdfPTable table = new PdfPTable(5);
-                table.setWidthPercentage(100);
-
-                Stream.of("Номер карти", "ПІБ", "Номер телефону", "Адреса", "Відсоток знижки")
-                        .forEach(columnTitle -> {
-                            PdfPCell header = new PdfPCell();
-                            header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                            header.setBorderWidth(1);
-                            header.setPhrase(new Phrase(columnTitle, font));
-                            table.addCell(header);
-                        });
-
-                font.setSize(12);
-                font.setStyle(Font.NORMAL);
-                while (customers_information.next()) {
-                    Stream.of(
-                            customers_information.getString("card_number"),
-                            customers_information.getString("pib"),
-                            customers_information.getString("phone_number"),
-                            customers_information.getString("address"),
-                            customers_information.getString("percent")
-                    ).forEach(data -> {
-                        PdfPCell cell = new PdfPCell();
-                        cell.setPhrase(new Phrase(data, font));
-                        table.addCell(cell);
-                    });
-                }
-
-                table.completeRow();
-                document.add(table);
-
-                document.close();
-                customers_information.close();
-                printerJob.endJob();
-            } else {
-                System.out.println("Користувач відмінив друк.");
-            }
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-        } catch (com.itextpdf.text.DocumentException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @FXML
-    public void printThisCustomerButtonOnAction(ActionEvent event) throws IOException {
-
+        printReportCustomers();
     }
 
     @FXML
@@ -326,10 +233,10 @@ public class CustomersListController implements Initializable {
             }
         }
         if (allFieldsFilled) {
-            updateCustomer();
+            update();
         }
     }
-    public void updateCustomer(){
+    public void update(){
         try {
             String newLastName = surnameField.getText();
             String newFirstName = nameField.getText();
@@ -340,26 +247,9 @@ public class CustomersListController implements Initializable {
             String newZipCode = zipCodeField.getText();
             String newPercent = percentField.getText();
 
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
+            updateCustomer(id, newLastName, newFirstName, newPatronymic, newPhone,
+                    newCity, newStreet, newZipCode, newPercent);
 
-            // 2. Редагувати дані про постійних клієнтів
-            String updateQuery = "UPDATE customer_card SET " +
-                    "cust_surname = '" + newLastName + "', " +
-                    "cust_name = '" + newFirstName + "', " +
-                    "cust_patronymic = '" + newPatronymic + "', " +
-                    "phone_number = '" + newPhone + "', " +
-                    "city = '" + newCity + "', " +
-                    "street = '" + newStreet + "', " +
-                    "zip_code = '" + newZipCode + "', " +
-                    "percent = '" + newPercent + "' " +
-                    "WHERE card_number = '" + id + "'";
-
-            statement.executeUpdate(updateQuery);
-
-            statement.close();
-            connectDB.close();
             updateAddBlock.setVisible(false);
 
             addButton.setDisable(false);
@@ -385,16 +275,8 @@ public class CustomersListController implements Initializable {
             if (selectedCustomer != null) {
                 String id = selectedCustomer[0].toString();
 
-                DatabaseConnection connection = new DatabaseConnection();
-                Connection connectDB = connection.getConnection();
-                Statement statement = connectDB.createStatement();
-
                 // 3. Видаляти дані про постійних клієнтів
-                String deleteCust = "DELETE FROM customer_card WHERE card_number = '" + id + "'";
-                statement.executeUpdate(deleteCust);
-
-                statement.close();
-                connectDB.close();
+                deleteCustomer(id);
 
                 clearTable();
                 loadCustomersData(true);
@@ -469,11 +351,11 @@ public class CustomersListController implements Initializable {
             }
         }
         if (allFieldsFilled) {
-            addCustomer();
+            add();
         }
     }
 
-    public void addCustomer(){
+    public void add(){
         try {
             String newLastName = surnameField.getText();
             String newFirstName = nameField.getText();
@@ -487,15 +369,8 @@ public class CustomersListController implements Initializable {
             // 1. Додавати нові дані про постійних клієнтів,
             String id_gen = generateRandomId(10, false);
 
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-
-            String insertCustQuery = "INSERT INTO customer_card (card_number, cust_surname, cust_name, cust_patronymic, phone_number, city, street, zip_code, percent) " +
-                    "VALUES ('" + id_gen + "', '" + newLastName + "', '" + newFirstName + "', '" + newPatronymic + "', '" + newPhone + "', '" + newCity + "', '" + newStreet + "', '" +
-                    newZipCode + "', '" + newPercent +  "')";
-
-            statement.executeUpdate(insertCustQuery);
+            insertCustomer(id_gen, newLastName, newFirstName, newPatronymic, newPhone, newCity,
+                    newStreet, newZipCode, newPercent);
 
             updateAddBlock.setVisible(false);
 
