@@ -166,6 +166,9 @@ public class RegistrationController implements Initializable {
         if (allFieldsValid && allDatesSelectedAndValid && roleSelected) {
             registerEmployee();
         }
+
+        Stage stage = (Stage) cancelButton.getScene().getWindow();
+        stage.close();
     }
 
     private boolean validateFields() {

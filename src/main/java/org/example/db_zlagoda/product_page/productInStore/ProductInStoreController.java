@@ -203,6 +203,7 @@ public class ProductInStoreController implements Initializable {
 
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
+            stage.setTitle("Переоцінка товару " + selectedProduct[3]);
             stage.show();
             stage.setOnHidden(e -> {
                 productsInStoreTable.getItems().clear();

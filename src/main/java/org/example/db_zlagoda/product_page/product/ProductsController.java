@@ -22,6 +22,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.example.db_zlagoda.DatabaseConnection;
 import org.example.db_zlagoda.product_page.productInStore.ProductInStoreAddUpdateController;
+import org.example.db_zlagoda.product_page.productInStore.ProductInStoreRevaluateController;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -131,8 +132,19 @@ public class ProductsController implements Initializable {
                 updateButton.setDisable(false);
                 deleteButton.setDisable(false);
                 addToStoreButton.setDisable(false);
+
+                Object[] selected = productsTable.getSelectionModel().getSelectedItem();
+                if(searchOption.getValue() != null) {
+                    if (searchOption.getValue().equals("За номером категорії")){
+                        categoryField.setText(selected[1].toString());
+                    } else {
+                        categoryField.setText(selected[2].toString());
+                    }
+                }
             }
         });
+
+        searchOption.setValue("За номером категорії");
 
         ObservableList<String> categories = FXCollections.observableList(getCategories());
         categoryNamesBox.setItems(categories);
@@ -186,23 +198,27 @@ public class ProductsController implements Initializable {
                 int productCount = resultSet.getInt(1);
 
                 if (productCount == 2) {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
+//                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
+//                    Parent root = loader.load();
+//                    ProductInStoreAddUpdateController controller = loader.getController();
+
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-revaluate-view.fxml"));
                     Parent root = loader.load();
-                    ProductInStoreAddUpdateController controller = loader.getController();
+                    ProductInStoreRevaluateController controller = loader.getController();
 
                     // якщо обраний товар акційний, то відбувається пошук НЕакційного товару, що посилається на той
                     // самий продукт
                     ResultSet non_promUPC = statement.executeQuery(
                             "SELECT UPC FROM store_product " +
-                                    "WHERE id_product = '" + id_prod_selected + "' AND " +
+                                    "WHERE id_product = '" + selectedProduct[0] + "' AND " +
                                     "promotional_product = '0'"
                     );
                     if (non_promUPC.next()){
-                        controller.fillFields(non_promUPC.getString("UPC"), false);
+                        controller.fillFields(non_promUPC.getString("UPC"));
                     }
-                    controller.revaluate();
 
                     Stage stage = new Stage();
+                    stage.setTitle("Переоцінка товару " + selectedProduct[3]);
                     stage.setScene(new Scene(root));
                     stage.show();
                 } else {

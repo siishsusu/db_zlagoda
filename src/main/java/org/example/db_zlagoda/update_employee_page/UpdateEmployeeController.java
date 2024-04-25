@@ -18,6 +18,7 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -128,6 +129,8 @@ public class UpdateEmployeeController implements Initializable {
         requiredDates = new ArrayList<>();
         requiredDates.add(birthDatePicker);
         requiredDates.add(firstWorkDayPicker);
+
+        addListeners();
     }
 
     @FXML
@@ -326,4 +329,60 @@ public class UpdateEmployeeController implements Initializable {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
         stage.close();
     }
+
+    private void addListeners() {
+        for (DatePicker pick : requiredDates) {
+            pick.valueProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue == null ||
+                        (pick == birthDatePicker && newValue.isAfter(LocalDate.now().minusYears(18)))) {
+                    pick.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+                } else {
+                    pick.setStyle(null);
+                }
+            });
+        }
+
+        for (TextField textField : Arrays.asList(firstNameField, lastNameField, patronymicField, cityField, streetField)) {
+            textField.textProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue.isBlank() || newValue.length() > 50) {
+                    textField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+                } else {
+                    textField.setStyle(null);
+                }
+            });
+        }
+
+        zipCodeField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.length() > 9) {
+                zipCodeField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+            } else {
+                zipCodeField.setStyle(null);
+            }
+        });
+
+        phoneNumberField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!(newValue.length() == 13 && newValue.startsWith("+380"))) {
+                phoneNumberField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+            } else {
+                phoneNumberField.setStyle(null);
+            }
+        });
+
+        salaryField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("^\\d+(\\.\\d+)?$") || newValue.length() > 13) {
+                salaryField.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+            } else {
+                salaryField.setStyle(null);
+            }
+        });
+
+        roleComBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                roleComBox.setStyle("-fx-border-color: RED; -fx-border-width: 2px");
+            } else {
+                roleComBox.setStyle(null);
+            }
+        });
+    }
+
 }

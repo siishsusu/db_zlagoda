@@ -399,49 +399,12 @@ public class DatabaseManager_mm {
         }
     }
 
-    // 3.1. Видаляти дані про працівників
-    public static void deleteEmployee (String id) {
-        String deleteEmployee = "DELETE FROM employee WHERE id_employee = ?";
-        delete(deleteEmployee, id);
-    }
-
-    // 3.2. Видаляти дані про постійних клієнтів
-    public static void deleteCustomer (String id) {
-        String deleteCustomer = "DELETE FROM customer_card WHERE card_number = ?";
-        delete(deleteCustomer, id);
-    }
-
-    // 3.3. Видаляти дані про категорії товарів
-    public static void deleteCategory(String number){
-        String deleteCategory = "DELETE FROM category WHERE category_number = ?";
-        delete(deleteCategory, number);
-    }
-
-    // 3.4. Видаляти дані про товари
-    public static void deleteProduct(String id){
-        String deleteProduct = "DELETE FROM product WHERE id_product = ?";
-        delete(deleteProduct, id);
-    }
-
-    // 3.5. Видаляти дані про товари у магазині
-    public static void deleteProductInStore(String upc) {
-        if (checkSalesForProduct(upc)) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Помилка");
-            alert.setHeaderText(null);
-            alert.setContentText("Неможливо видалити товар, оскільки існують зв'язані записи у таблиці sale.");
-            alert.showAndWait();
-            return;
-        }
-        String deleteProduct = "DELETE FROM store_product WHERE UPC = ?";
-        delete(deleteProduct, upc);
-    }
-
-    private static boolean checkSalesForProduct(String upc) {
+    private static boolean checkSmthForSmth(String id, String query){
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(
-                     "SELECT COUNT(*) FROM sale WHERE UPC = ?")) {
-            preparedStatement.setString(1, upc);
+                     query
+             )) {
+            preparedStatement.setString(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 int count = resultSet.getInt(1);
@@ -453,6 +416,67 @@ public class DatabaseManager_mm {
         return false;
     }
 
+    // 3.1. Видаляти дані про працівників
+    public static void deleteEmployee (String id) {
+        if (checkChecksForEmployee(id)) {
+            setAlert("Неможливо видалити працівника, оскільки існують чеки створені ним.");
+            return;
+        }
+        String deleteEmployee = "DELETE FROM employee WHERE id_employee = ?";
+        delete(deleteEmployee, id);
+    }
+
+    private static boolean checkChecksForEmployee(String id){
+        return checkSmthForSmth(id, "SELECT COUNT(*) FROM `check` WHERE id_employee = ?");
+    }
+
+    // 3.2. Видаляти дані про постійних клієнтів
+    public static void deleteCustomer (String id) {
+        if (checkChecksForCustomers(id)) {
+            setAlert("Неможливо видалити постійного клієнта, оскільки існують чеки з його ім'ям.");
+            return;
+        }
+        String deleteCustomer = "DELETE FROM customer_card WHERE card_number = ?";
+        delete(deleteCustomer, id);
+    }
+
+    private static boolean checkChecksForCustomers(String id){
+        return checkSmthForSmth(id, "SELECT COUNT(*) FROM `check` WHERE card_number = ?");
+    }
+
+    // 3.3. Видаляти дані про категорії товарів
+    public static void deleteCategory(String number){
+        String deleteCategory = "DELETE FROM category WHERE category_number = ?";
+        delete(deleteCategory, number);
+    }
+
+    // 3.4. Видаляти дані про товари
+    public static void deleteProduct(String id){
+        if (checkShopForProduct(id)) {
+            setAlert("Неможливо видалити товар, оскільки він є в наявності магазину.");
+            return;
+        }
+        String deleteProduct = "DELETE FROM product WHERE id_product = ?";
+        delete(deleteProduct, id);
+    }
+
+    private static boolean checkShopForProduct (String id){
+        return checkSmthForSmth(id, "SELECT COUNT(*) FROM store_product WHERE id_product = ?");
+    }
+
+    // 3.5. Видаляти дані про товари у магазині
+    public static void deleteProductInStore(String upc) {
+        if (checkSalesForProduct(upc)) {
+            setAlert("Неможливо видалити товар, оскільки існують зв'язані записи у таблиці sale.");
+            return;
+        }
+        String deleteProduct = "DELETE FROM store_product WHERE UPC = ?";
+        delete(deleteProduct, upc);
+    }
+
+    private static boolean checkSalesForProduct(String upc) {
+        return checkSmthForSmth(upc, "SELECT COUNT(*) FROM sale WHERE UPC = ?");
+    }
 
     // 3.6. Видаляти дані про чеки;
     public static void deleteCheck(String id){
@@ -590,7 +614,9 @@ public class DatabaseManager_mm {
                         "date_of_start, " +
                         "phone_number, " +
                         "CONCAT('м. ', city, ' вул. ', street, ' поштовий індекс: ', zip_code) AS address " +
-                        "FROM employee;");
+                        "FROM employee " +
+                        "ORDER BY pib;"
+        );
     }
 
     private static ResultSet getCashiersReportData() throws SQLException {
@@ -604,7 +630,8 @@ public class DatabaseManager_mm {
                         "phone_number, " +
                         "CONCAT('м. ', city, ' вул. ', street, ' поштовий індекс: ', zip_code) AS address " +
                         "FROM employee " +
-                        "WHERE empl_role = 'Касир'");
+                        "WHERE empl_role = 'Касир' " +
+                        "ORDER BY pib");
     }
 
     private static ResultSet getThisEmployeeReportData(String id_empl) throws SQLException {
@@ -654,7 +681,8 @@ public class DatabaseManager_mm {
                         "phone_number, " +
                         "CONCAT('м. ', city, ' вул. ', street, ' поштовий індекс: ', zip_code) AS address, " +
                         "percent " +
-                        "FROM customer_card;"
+                        "FROM customer_card " +
+                        "ORDER BY pib;"
         );
     }
 
@@ -686,7 +714,8 @@ public class DatabaseManager_mm {
     private static ResultSet getCategoryReportData() {
         return executeQuery(
                 "SELECT * " +
-                        "FROM category;"
+                        "FROM category " +
+                        "ORDER BY category_name;"
         );
     }
 
@@ -814,7 +843,7 @@ public class DatabaseManager_mm {
             reportTitle = "Звіт з інформацією про всі чеки";
 
             String[] titles = {"Номер чеку", "id працівника", "Номер карти клієнта", "Дата друку", "Загальна сума", "ПДВ"};
-            String[] dbFields = {"id_product", "id_employee", "card_number", "print_date", "sum_total", "vat"};
+            String[] dbFields = {"check_number", "id_employee", "card_number", "print_date", "sum_total", "vat"};
 
             if (reportData != null) {
                 printPDFReport(reportData, reportTitle, titles, dbFields, initialName);
@@ -829,13 +858,9 @@ public class DatabaseManager_mm {
 
     private static ResultSet getCheckReportData() {
         return executeQuery(
-                "SELECT product.id_product, product.category_number, " +
-                        "category.category_name, product.product_name, " +
-                        "product.characteristics " +
-                        "FROM product " +
-                        "INNER JOIN category " +
-                        "ON category.category_number = product.category_number " +
-                        "ORDER BY product.product_name;"
+                "SELECT * " +
+                        "FROM `check` " +
+                        "ORDER BY check_number;"
         );
     }
 
@@ -1081,5 +1106,15 @@ public class DatabaseManager_mm {
                         "BETWEEN '" + startDate + "' " +
                         "AND '" + endDate + "'"
         );
+    }
+
+
+    // додаткові методи
+    private static void setAlert(String message){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Помилка");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
