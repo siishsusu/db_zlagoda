@@ -48,7 +48,7 @@ public class DatabaseManager {
         window.showAndWait();
     }
 
-    public static CategoryItem getCategoryByID(Connection db, int id) throws SQLException {
+    public static CategoryItem getCategoryByID(Connection db, int id) {
         CategoryItem categoryItem = null;
         try{
             PreparedStatement preparedStatement = db.prepareStatement(

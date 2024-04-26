@@ -354,7 +354,7 @@ public class CashierMenuViewController {
             clearReceipt();
             data.loadProducts(null);
         } catch (SQLException e) {
-            e.printStackTrace();
+            DatabaseManager.showSQLError("Failed to save receipts to database");
         }
     }
 
@@ -574,10 +574,16 @@ public class CashierMenuViewController {
     }
 
     public void addReceiptsFromDB(Date date) throws SQLException {
-        ObservableList<Receipt> list = DatabaseManager.selectReceipts(database, date, user.getId());
-        list.removeAll(data.getReceipts());
-        data.getReceipts().addAll(list);
-        data.getReceipts().sort(Comparator.reverseOrder());
+        try{
+            ObservableList<Receipt> list = DatabaseManager.selectReceipts(database, date, user.getId());
+            list.removeAll(data.getReceipts());
+            data.getReceipts().addAll(list);
+            data.getReceipts().sort(Comparator.reverseOrder());
+        } catch (SQLException e) {
+            DatabaseManager.showSQLError("Failed to add receipts from database");
+        }
+
+
     }
 
     private void removeSearchProductTables() {
