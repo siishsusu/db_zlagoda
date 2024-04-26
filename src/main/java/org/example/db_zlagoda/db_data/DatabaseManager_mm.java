@@ -1,6 +1,7 @@
 package org.example.db_zlagoda.db_data;
 
 import com.itextpdf.text.*;
+import com.itextpdf.text.Font;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -10,6 +11,7 @@ import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
 import org.example.db_zlagoda.DatabaseConnection;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -203,11 +205,23 @@ public class DatabaseManager_mm {
                     updateStatement.setString(2, numberOfNonPromotional.getString("UPC"));
                     updateStatement.executeUpdate();
                 } else {
-                    String deleteProd = "DELETE FROM store_product " +
-                            "WHERE UPC = ?";
-                    PreparedStatement deleteStatement = connection.prepareStatement(deleteProd);
-                    deleteStatement.setString(1, numberOfNonPromotional.getString("UPC"));
-                    deleteStatement.executeUpdate();
+                    String check_sales = "SELECT * FROM sale WHERE UPC = '" + numberOfNonPromotional.getString("UPC") + "'";
+                    PreparedStatement check_sales_statement = connection.prepareStatement(check_sales);
+                    if(!check_sales_statement.executeQuery().next()){
+                        String deleteProd = "DELETE FROM store_product " +
+                                "WHERE UPC = ?";
+                        PreparedStatement deleteStatement = connection.prepareStatement(deleteProd);
+                        deleteStatement.setString(1, numberOfNonPromotional.getString("UPC"));
+                        deleteStatement.executeUpdate();
+                    } else {
+                        String updateQuery = "UPDATE store_product SET " +
+                                "products_number = ? " +
+                                "WHERE UPC = ?";
+                        PreparedStatement updateStatement = connection.prepareStatement(updateQuery);
+                        updateStatement.setInt(1, newProdNum);
+                        updateStatement.setString(2, numberOfNonPromotional.getString("UPC"));
+                        updateStatement.executeUpdate();
+                    }
                 }
             }
 
@@ -484,67 +498,69 @@ public class DatabaseManager_mm {
         delete(deleteCheck, id);
     }
 
-    // друкування звітів
-    private static void printPDFReport(ResultSet data, String reportTitle,
-                                       String[] columnTitles, String[] db_fields, String fileName)
-            throws SQLException, IOException, com.itextpdf.text.DocumentException {
-        PrinterJob printerJob = PrinterJob.createPrinterJob();
-        if (printerJob != null && printerJob.showPrintDialog(null)) {
-            Document document = new Document();
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Зберегти PDF-файл");
-            fileChooser.setInitialFileName(fileName + ".pdf");
-            fileChooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
-            );
-            File tempFile = fileChooser.showSaveDialog(null);
-            if (tempFile != null) { // Перевіряємо, чи користувач обрав файл для збереження
-                PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(tempFile));
-                document.open();
+     // друкування звітів
+     private static void printPDFReport(ResultSet data, String reportTitle,
+                                        String[] columnTitles, String[] db_fields, String fileName)
+             throws SQLException, IOException, com.itextpdf.text.DocumentException {
+         PrinterJob printerJob = PrinterJob.createPrinterJob();
+         if (printerJob != null && printerJob.showPrintDialog(null)) {
+             Document document = new Document();
+             FileChooser fileChooser = new FileChooser();
+             fileChooser.setTitle("Зберегти PDF-файл");
+             fileChooser.setInitialFileName(fileName + ".pdf");
+             fileChooser.getExtensionFilters().addAll(
+                     new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
+             );
+             File tempFile = fileChooser.showSaveDialog(null);
+             if (tempFile != null) { // Перевіряємо, чи користувач обрав файл для збереження
+                 PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(tempFile));
+                 document.open();
 
-                Font font = FontFactory.getFont("src/main/resources/fonts/Academy.ttf", BaseFont.IDENTITY_H, true);
+                 Font font = FontFactory.getFont("src/main/resources/fonts/Academy.ttf", BaseFont.IDENTITY_H, true);
 
-                font.setSize(20);
-                font.setStyle(Font.BOLD);
-                Paragraph title = new Paragraph(reportTitle, font);
+                 font.setSize(20);
+                 font.setStyle(Font.BOLD);
+                 Paragraph title = new Paragraph(reportTitle, font);
 
-                title.setAlignment(Element.ALIGN_CENTER);
-                title.setSpacingAfter(10);
-                document.add(title);
+                 title.setAlignment(Element.ALIGN_CENTER);
+                 title.setSpacingAfter(10);
+                 document.add(title);
 
-                PdfPTable table = new PdfPTable(columnTitles.length);
-                table.setWidthPercentage(100);
+                 PdfPTable table = new PdfPTable(columnTitles.length);
+                 table.setWidthPercentage(100);
 
-                for (String columnTitle : columnTitles) {
-                    PdfPCell header = new PdfPCell();
-                    header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                    header.setBorderWidth(1);
-                    header.setPhrase(new Phrase(columnTitle, font));
-                    table.addCell(header);
-                }
+                 for (String columnTitle : columnTitles) {
+                     PdfPCell header = new PdfPCell();
+                     header.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                     header.setBorderWidth(1);
+                     header.setPhrase(new Phrase(columnTitle, font));
+                     table.addCell(header);
+                 }
 
-                font.setSize(12);
-                font.setStyle(Font.NORMAL);
-                while (data.next()) {
-                    for (String columnTitle : db_fields) {
-                        PdfPCell cell = new PdfPCell();
-                        cell.setPhrase(new Phrase(data.getString(columnTitle), font));
-                        table.addCell(cell);
-                    }
-                }
+                 font.setSize(12);
+                 font.setStyle(Font.NORMAL);
+                 while (data.next()) {
+                     for (String columnTitle : db_fields) {
+                         PdfPCell cell = new PdfPCell();
+                         cell.setPhrase(new Phrase(data.getString(columnTitle), font));
+                         table.addCell(cell);
+                     }
+                 }
 
-                table.completeRow();
-                document.add(table);
+                 table.completeRow();
+                 document.add(table);
 
-                document.close();
-                printerJob.endJob();
-            }
-            else {
-                System.out.println("Користувач відмінив друк.");
-            }
-        }
-    }
+                 document.close();
+                 printerJob.endJob();
 
+                 // Відкриваємо файл після збереження
+                 Desktop desktop = Desktop.getDesktop();
+                 desktop.open(tempFile);
+             } else {
+                 System.out.println("Користувач відмінив друк.");
+             }
+         }
+     }
 
     // 4.1. Видруковувати звіти з інформацією про усіх працівників
     public static void printReportEmployee(int screen) {

@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -57,7 +58,6 @@ public class RegistrationController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
         generateUsernameButton.setDisable(true);
 
         ObservableList<String> options =
@@ -165,10 +165,9 @@ public class RegistrationController implements Initializable {
 
         if (allFieldsValid && allDatesSelectedAndValid && roleSelected) {
             registerEmployee();
+            Stage stage = (Stage) cancelButton.getScene().getWindow();
+            stage.close();
         }
-
-        Stage stage = (Stage) cancelButton.getScene().getWindow();
-        stage.close();
     }
 
     private boolean validateFields() {
