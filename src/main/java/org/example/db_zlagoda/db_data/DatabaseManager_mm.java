@@ -1002,7 +1002,7 @@ public class DatabaseManager_mm {
                         "INNER JOIN product " +
                         "ON product.id_product = store_product.id_product " +
                         "WHERE promotional_product = '" + promotion + "' " +
-                        "ORDER BY product_name;"
+                        "ORDER BY product_name, products_number;"
         );
     }
 
@@ -1015,7 +1015,7 @@ public class DatabaseManager_mm {
                         "INNER JOIN product " +
                         "ON product.id_product = store_product.id_product " +
                         "WHERE promotional_product = '" + promotion + "' " +
-                        "ORDER BY products_number;"
+                        "ORDER BY products_number, product_name;"
         );
     }
 

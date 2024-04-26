@@ -118,47 +118,26 @@ public class ProductInStoreController implements Initializable {
                 deleteButton.setDisable(false);
                 if (newSelection[6].toString().equals("0")){
                     productRevaluationButton.setDisable(false);
+                    productRevaluationButton.setOnAction(event -> {
+                        try {
+                            productRevaluationButtonOnAction();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 } else if (newSelection[6].toString().equals("1")) {
                     productRevaluationButton.setDisable(false);
-                    DatabaseConnection connection = new DatabaseConnection();
-                    Connection connectDB = connection.getConnection();
-                    try {
-                        String productId = newSelection[2].toString();
-
-                        String checkNonPromotionalQuery = "SELECT * FROM store_product " +
-                                "WHERE id_product = '" + productId + "' " +
-                                "AND promotional_product = '0'";
-
-                        Statement statement = connectDB.createStatement();
-                        ResultSet resultSet = statement.executeQuery(checkNonPromotionalQuery);
-                        if (resultSet.next()) {
-                            // Якщо є товар з вказаним id, який не є акційним, то активувати кнопку
-                            productRevaluationButton.setOnAction(productRevaluationButton.getOnAction());
-                        } else {
-                            // Якщо товару з вказаним id немає або він є акційним, то деактивувати кнопку
-                            try {
-                                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
-                                Parent root = loader.load();
-                                ProductInStoreAddUpdateController controller = loader.getController();
-                                controller.add(newSelection[2].toString());
-
-                                Stage stage = new Stage();
-                                stage.setScene(new Scene(root));
-                                stage.show();
-                                stage.setOnHidden(e -> {
-                                    productsInStoreTable.getItems().clear();
-                                    loadProductsInStore();
-                                });
-                            } catch (IOException e) {}
+                    productRevaluationButton.setOnAction(event -> {
+                        try {
+                            productRevaluationButtonOnAction_nonProm();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
                         }
-
-                        resultSet.close();
-                        statement.close();
-                        connectDB.close();
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-
+                    });
                 }
 
                 Object[] selectedProduct = productsInStoreTable.getSelectionModel().getSelectedItem();
@@ -168,7 +147,48 @@ public class ProductInStoreController implements Initializable {
     }
 
     @FXML
-    public void productRevaluationButtonOnAction (ActionEvent event) throws IOException, SQLException {
+    public void productRevaluationButtonOnAction_nonProm () throws IOException, SQLException {
+        DatabaseConnection connection = new DatabaseConnection();
+        Connection connectDB = connection.getConnection();
+        Object[] selectedProduct = productsInStoreTable.getSelectionModel().getSelectedItem();
+        try {
+            String productId = selectedProduct[2].toString();
+
+            String checkNonPromotionalQuery = "SELECT * FROM store_product " +
+                    "WHERE id_product = '" + productId + "' " +
+                    "AND promotional_product = '0'";
+
+            Statement statement = connectDB.createStatement();
+            ResultSet resultSet = statement.executeQuery(checkNonPromotionalQuery);
+            if (resultSet.next()) {
+                productRevaluationButton.setOnAction(productRevaluationButton.getOnAction());
+            } else {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
+                    Parent root = loader.load();
+                    ProductInStoreAddUpdateController controller = loader.getController();
+                    controller.add(selectedProduct[2].toString());
+
+                    Stage stage = new Stage();
+                    stage.setScene(new Scene(root));
+                    stage.show();
+                    stage.setOnHidden(e -> {
+                        productsInStoreTable.getItems().clear();
+                        loadProductsInStore();
+                    });
+                } catch (IOException e) {}
+            }
+
+            resultSet.close();
+            statement.close();
+            connectDB.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @FXML
+    public void productRevaluationButtonOnAction () throws IOException, SQLException {
         // переоцінка товару
         revaluate();
     }

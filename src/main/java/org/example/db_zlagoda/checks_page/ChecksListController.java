@@ -230,6 +230,10 @@ public class ChecksListController implements Initializable {
             if(newSelection != null){
                 checkInfoButton.setDisable(false);
                 deleteButton.setDisable(false);
+
+                if (employee_product_box.getValue().equals("Пошук за id працівника")){
+                    employee_field.setText(newSelection[1].toString());
+                }
             }
         });
 

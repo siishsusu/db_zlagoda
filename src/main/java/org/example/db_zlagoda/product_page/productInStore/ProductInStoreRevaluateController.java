@@ -50,8 +50,8 @@ public class ProductInStoreRevaluateController {
     @FXML
     public void revaluateButtonOnAction(ActionEvent event) {
         try {
-            String newPrice = priceField.getText();
-            String newQuantity = quantityField.getText();
+            String newPrice = new_price.getText();
+            String newQuantity = new_quantity.getText();
             String prodUpc = upc;
 
             updateProductRevaluation(prodUpc, newPrice, newQuantity);

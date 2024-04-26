@@ -516,7 +516,31 @@ public class ProductInStoreAddUpdateController implements Initializable {
             String numOfProd = numOfProdField.getText();
             String promotional = (String) promBox.getValue();
 
+            DatabaseConnection connection = new DatabaseConnection();
+            Connection connectDB = connection.getConnection();
+            Statement statement = connectDB.createStatement();
+
             insertProductStore(upc, upcProm, idProd, price, numOfProd, promotional);
+
+            if (promotionalProduct){
+                ResultSet not_prom = statement.executeQuery(
+                        "SELECT UPC " +
+                                "FROM store_product " +
+                                "WHERE id_product = '" + prodIDField.getText() + "' " +
+                                "AND UPC <> '" + upcField.getText() + "' AND promotional_product = '0'"
+                );
+                if(not_prom.next()) {
+                    String upc_this = not_prom.getString("UPC");
+
+                    String updateQuery = "UPDATE store_product SET " +
+                            "UPC_prom = '" + upcField.getText() + "' " +
+                            "WHERE UPC = '" + upc_this + "'";
+                    statement.executeUpdate(updateQuery);
+                }
+            }
+
+            statement.close();
+            connectDB.close();
 
             Stage stage = (Stage) upcField.getScene().getWindow();
             stage.close();
