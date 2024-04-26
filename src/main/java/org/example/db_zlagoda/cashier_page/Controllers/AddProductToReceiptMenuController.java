@@ -1,5 +1,6 @@
 package org.example.db_zlagoda.cashier_page.Controllers;
 
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -13,6 +14,7 @@ import javafx.stage.Stage;
 import org.example.db_zlagoda.cashier_page.Views.CashierMenuView;
 import org.example.db_zlagoda.utils.MenuChanger;
 import org.example.db_zlagoda.utils.SaleFilter;
+import org.example.db_zlagoda.utils.tableview_tools.FilterQuery;
 import org.example.db_zlagoda.utils.tableview_tools.ProductItem;
 import org.example.db_zlagoda.utils.tableview_tools.TableViewLoader;
 
@@ -21,6 +23,8 @@ import java.io.IOException;
 public class AddProductToReceiptMenuController {
     public Button selectAmountButton;
     public TextArea productSearchQuery;
+    public ChoiceBox<String> searchByChoiceBox;
+    public ChoiceBox<String> sortByChoiceBox;
     private Stage stage;
     public TableView productsTable;
     public HBox viewContainer;
@@ -34,7 +38,9 @@ public class AddProductToReceiptMenuController {
     private ProductItem productSelected;
 
     public void initialize() {
+        ControllerAccess.addProductToReceiptMenuController = this;
         TableViewLoader.initProductsTable(productsTable, product_upc, product_name, product_category, product_amount, product_price, product_prom);
+        ControllerAccess.cashierMenuViewController.data.loadProducts();
         productsTable.setItems(ControllerAccess.cashierMenuViewController.data.getFilteredProducts());
         selectAmountButton.setDisable(true);
         productsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
@@ -45,9 +51,12 @@ public class AddProductToReceiptMenuController {
             }
         });
 
-        productSearchQuery.textProperty().addListener(_ ->{
-            ControllerAccess.cashierMenuViewController.filterProducts(productSearchQuery.textProperty().get());
-        });
+
+        sortByChoiceBox.setItems(FXCollections.observableArrayList("Назвою", "Кількістю", "Категорією"));
+        sortByChoiceBox.getSelectionModel().select("Назвою");
+
+        searchByChoiceBox.setItems(FXCollections.observableArrayList("UPC", "Назвою"));
+        searchByChoiceBox.getSelectionModel().select("Назвою");
 
         ControllerAccess.cashierMenuViewController.filterProducts(productSearchQuery.textProperty().get());
     }
@@ -147,6 +156,21 @@ public class AddProductToReceiptMenuController {
     public void openFiltersMenu(ActionEvent actionEvent) throws IOException {
         MenuChanger.changeMenu(MenuChanger.LoaderClass.CashierView,
                 "products-filters-view.fxml",
-                "Додати товар до чеку");
+                "Фільтри");
+    }
+
+    public void filterProducts(ActionEvent actionEvent) {
+
+        if(sortByChoiceBox.getValue() == null || searchByChoiceBox == null) {
+            sortByChoiceBox.setValue("Назвою");
+        }
+        if(searchByChoiceBox.getValue() == null) {
+            searchByChoiceBox.setValue("Назвою");
+        }
+
+        String tableType = "products";
+        FilterQuery query = new FilterQuery(searchByChoiceBox.getValue(), sortByChoiceBox.getValue(), tableType, productSearchQuery.getText(), ControllerAccess.cashierMenuViewController.categoryFilter, ControllerAccess.cashierMenuViewController.saleFilter);
+        ControllerAccess.cashierMenuViewController.data.loadProducts(query);
+
     }
 }

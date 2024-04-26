@@ -16,8 +16,14 @@
         <children>
             <HBox alignment="CENTER_LEFT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="900.0" spacing="5.0">
                 <children>
-                    <Button mnemonicParsing="false" text="Фільтри" />
-                    <TextArea maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                    <VBox maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                        <Label text="Пошук за ПІБ"/>
+                        <TextArea fx:id="searchArea" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                    </VBox>
+                    <VBox maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                        <Label text="Пошук за процентом"/>
+                        <TextArea fx:id="searchPercentArea" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                    </VBox>
                 </children>
                 <padding>
                     <Insets bottom="5.0" top="5.0" />

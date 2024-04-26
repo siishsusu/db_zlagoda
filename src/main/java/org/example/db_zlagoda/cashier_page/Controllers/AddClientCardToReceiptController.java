@@ -1,21 +1,22 @@
 package org.example.db_zlagoda.cashier_page.Controllers;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.example.db_zlagoda.db_data.DatabaseManager;
 import org.example.db_zlagoda.utils.tableview_tools.ClientItem;
 import org.example.db_zlagoda.utils.tableview_tools.TableViewLoader;
 
 import java.io.IOException;
 
 public class AddClientCardToReceiptController {
+    public TextArea searchArea;
+    public TextArea searchPercentArea;
     private Stage stage;
     public TableView clientsTable;
     public VBox viewContainer;
@@ -26,10 +27,16 @@ public class AddClientCardToReceiptController {
     public TableColumn discount;
     private ClientItem clientSelected;
     public Button addCardButton;
+    private FilteredList<ClientItem> filteredList;
+    private ObservableList<ClientItem> observableList;
+    private String percent = null;
+    private String query = null;
 
     public void initialize() {
         TableViewLoader.initClientsTable(clientsTable, id, name, phone, address, discount);
-        clientsTable.setItems(ControllerAccess.cashierMenuViewController.data.getClients());
+        observableList = FXCollections.observableArrayList(DatabaseManager.getClientTableItems());
+        filteredList = new FilteredList<>(observableList);
+        clientsTable.setItems(filteredList);
         addCardButton.setDisable(true);
         clientsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -38,6 +45,32 @@ public class AddClientCardToReceiptController {
                 addCardButton.setDisable(true);
             }
         });
+
+        searchArea.textProperty().addListener(_ ->{
+            query = searchArea.getText();
+            filterProducts();
+        });
+
+        searchPercentArea.textProperty().addListener(_ ->{
+            percent = searchPercentArea.getText();
+            System.out.println(percent);
+            filterProducts();
+        });
+
+
+    }
+
+
+    public void filterProducts() {
+        if(query == null || query.isEmpty()) {
+            filteredList.setPredicate(s ->
+                    (percent == null || percent.isEmpty() || String.valueOf(s.getDiscount()).startsWith(percent)));
+        }
+        else {
+            filteredList.setPredicate(s ->
+                    s.getName().toLowerCase().contains(query.toLowerCase())
+                    && (percent == null || percent.isEmpty() || String.valueOf(s.getDiscount()).startsWith(percent)));
+        }
     }
 
     private void initStage() {
@@ -49,6 +82,7 @@ public class AddClientCardToReceiptController {
     public void closeMenu(ActionEvent event) {
         if(stage == null) initStage();
         stage.close();
+        ControllerAccess.cashierMenuViewController.cashierMenuContainer.setDisable(false);
     }
 
     @FXML
@@ -56,7 +90,7 @@ public class AddClientCardToReceiptController {
         clientSelected = (ClientItem) clientsTable.getSelectionModel().getSelectedItem();
         if(stage == null) initStage();
         ControllerAccess.cashierMenuViewController.addReceiptClientCard(clientSelected);
-        closeMenu(event);
+        stage.close();
     }
 
 

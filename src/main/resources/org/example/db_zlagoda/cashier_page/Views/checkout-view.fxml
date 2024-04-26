@@ -57,7 +57,7 @@
                 <Insets bottom="5.0" top="5.0" />
             </padding>
             <children>
-                <Button mnemonicParsing="false" onAction="#deleteReceipt" text="Видалити" />
+                <Button mnemonicParsing="false" onAction="#deleteReceipt" text="Скасувати" />
                 <Button mnemonicParsing="false" onAction="#saveReceipt" text="Зберегти" />
                 <Label fx:id="receipt_sum" alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Сума (з ПДВ):" HBox.hgrow="ALWAYS">
                     <font>

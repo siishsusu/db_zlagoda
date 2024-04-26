@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.stream.Stream;
@@ -109,8 +108,10 @@ public class CashierMenuViewController {
     public Button productsStoreButton;
     public Button productsAllButton;
 
-    public ChoiceBox productsFilterChoiceBox;
     public TextArea productSearchQuery;
+
+    public ChoiceBox<String> searchByChoiceBox;
+    public ChoiceBox<String> sortByChoiceBox;
 
 
     private VBox[] menus;
@@ -125,8 +126,8 @@ public class CashierMenuViewController {
     public ObservableList<String> productFilters;
     public String productSearchType = "product_name";
 
-    private SaleFilter saleFilter = SaleFilter.All;
-    private CategoryItem categoryFilter = null;
+    SaleFilter saleFilter = SaleFilter.All;
+    CategoryItem categoryFilter = null;
 
 
     public void initialize() {
@@ -142,50 +143,71 @@ public class CashierMenuViewController {
         saveReceiptButton.setDisable(true);
         data = new SessionData();
 
-        productSearchQuery.textProperty().addListener(_ ->{
-            filterProducts(productSearchQuery.textProperty().get());
-        });
+//        productSearchQuery.textProperty().addListener(_ ->{
+//            filterProducts(productSearchQuery.textProperty().get());
+//        });
+//
+//        filterProducts(productSearchQuery.textProperty().get());
+    }
 
-        filterProducts(productSearchQuery.textProperty().get());
+
+    public void filterProducts() {
+        data.getFilteredProducts().setPredicate(_ -> true);
+        data.getFilteredAllProducts().setPredicate(_ -> true);
+        data.getFilteredCategories().setPredicate(_ -> true);
+
+        if(sortByChoiceBox.getValue() == null || searchByChoiceBox == null) {
+           sortByChoiceBox.setValue("Назвою");
+        }
+        if(searchByChoiceBox.getValue() == null) {
+            searchByChoiceBox.setValue("Назвою");
+        }
+
+        String tableType = categoriesButton.isDisable() ? "categories" : (productsStoreButton.isDisable() ? "products" : "allProducts");
+        System.out.println(tableType);
+        FilterQuery query = new FilterQuery(searchByChoiceBox.getValue(), sortByChoiceBox.getValue(), tableType, productSearchQuery.getText(), categoryFilter, saleFilter);
+        data.loadProducts(query);
+        data.getFilteredProducts().setPredicate(s -> s.getAmount() > 0);
+
+        if(ControllerAccess.addProductToReceiptMenuController != null && ControllerAccess.addProductToReceiptMenuController.productsTable != null) {
+            ControllerAccess.addProductToReceiptMenuController.filterProducts(null);
+        }
+    }
+
+    public void resetAllFilters() {
+        data.getFilteredProducts().setPredicate(_ -> true);
+        data.getFilteredAllProducts().setPredicate(_ -> true);
+        data.getFilteredCategories().setPredicate(_ -> true);
+        data.loadProducts(null);
     }
 
     public void filterProducts(String filter) {
-        if(filter == null || filter.length() == 0) {
+                if(filter == null || filter.length() == 0) {
             data.getFilteredProducts().setPredicate(this::checkFilter);
             data.getFilteredAllProducts().setPredicate(this::checkFilter);
             data.getFilteredCategories().setPredicate(s -> true);
-
-//            if(productsStoreButton.isDisable()) {
-//                data.getFilteredProducts().setPredicate(this::checkFilter);
-//            } else if (productsAllButton.isDisable()) {
-//                data.getFilteredAllProducts().setPredicate(this::checkFilter);
-//            } else if (categoriesButton.isDisable()){
-//                data.getFilteredCategories().setPredicate(s -> true);
-//            } else {
-//
-//            }
         }
         else {
-            data.getFilteredProducts().setPredicate(s -> (s.getName().startsWith(filter) || s.getUpc().startsWith(filter)) && checkFilter(s));
-            data.getFilteredAllProducts().setPredicate(s -> s.getName().startsWith(filter) && checkFilter(s));
-            data.getFilteredCategories().setPredicate(s -> s.getName().startsWith(filter));
-
-//            if(productsStoreButton.isDisable()) {
-//                data.getFilteredProducts().setPredicate(s -> (s.getName().startsWith(filter) || s.getUpc().startsWith(filter)) && checkFilter(s));
-//            } else if (productsAllButton.isDisable()) {
-//                data.getFilteredAllProducts().setPredicate(s -> s.getName().startsWith(filter) && checkFilter(s));
-//            } else {
-//                data.getFilteredCategories().setPredicate(s -> s.getName().startsWith(filter));
-//            }
+            data.getFilteredProducts().setPredicate(s -> checkFilter(s) &&
+                    (s.getName().toLowerCase().startsWith(filter.toLowerCase())
+                            || s.getUpc().toLowerCase().startsWith(filter.toLowerCase())));
+            data.getFilteredAllProducts().setPredicate(s -> checkFilter(s) &&
+                    (s.getName().toLowerCase().startsWith(filter.toLowerCase())
+                            || String.valueOf(s.getId()).toLowerCase().startsWith(filter.toLowerCase())));
+            data.getFilteredCategories().setPredicate(s -> s.getName().startsWith(filter.toLowerCase()));
         }
     }
+
+
     private boolean checkFilter(ProductItem item) {
-        boolean category = categoryFilter == null ? true : item.getCategory().getId() == categoryFilter.getId();
+        boolean category = categoryFilter == null || item.getCategory().getId() == categoryFilter.getId();
         boolean sale;
         if(saleFilter == SaleFilter.All) {sale = true;}
         else if(saleFilter == SaleFilter.NonSale) {sale = item.getSaleUpc() == null || item.getSaleUpc().isEmpty();}
         else {sale = item.getSaleUpc() != null && !item.getSaleUpc().isEmpty();}
-        return category && sale;
+        boolean positiveAmount = item.getAmount() > 0;
+
+        return category && sale && positiveAmount;
     }
 
     private boolean checkFilter(ProductInfo item) {
@@ -196,7 +218,8 @@ public class CashierMenuViewController {
     public void setFilters(CategoryItem category, SaleFilter sale) {
         this.categoryFilter = category;
         this.saleFilter = sale;
-        filterProducts(productSearchQuery.getText());
+        if(this.saleFilter == null) this.saleFilter = SaleFilter.All;
+        filterProducts();
     }
 
     private void initProductsTable() {
@@ -329,7 +352,7 @@ public class CashierMenuViewController {
             receipt.setId(DatabaseManager.getCheckID(receipt));
             data.addReceipt(receipt);
             clearReceipt();
-            data.loadProducts();
+            data.loadProducts(null);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -455,14 +478,14 @@ public class CashierMenuViewController {
 
 
     private void updateAmount(ProductItem product, boolean subtract) {
-        try {
-            int amount = product.getAmount();
-            amount = subtract ? amount * -1 : amount;
-            data.editProductAmount(product, amount);
-        } catch (NegativeAmountException e) {
-            //TODO: show error message on screen
-            e.printStackTrace();
-        }
+//        try {
+//            int amount = product.getAmount();
+//            amount = subtract ? amount * -1 : amount;
+//            data.editProductAmount(product, amount);
+//        } catch (NegativeAmountException e) {
+//            //TODO: show error message on screen
+//            e.printStackTrace();
+//        }
         updateAllTables();
     }
 
@@ -572,18 +595,29 @@ public class CashierMenuViewController {
         removeSearchProductTables();
         productsTablesContainer.getChildren().add(categoryTable);
         categoriesButton.setDisable(true);
+        setChoiceBoxItems(new String[]{"Назвою", "Номером"}, new String[]{"Номером", "Назвою"});
     }
     @FXML
     public void productsStoreButtonOnAction(ActionEvent actionEvent) {
         removeSearchProductTables();
         productsTablesContainer.getChildren().add(productsTable);
         productsStoreButton.setDisable(true);
+        setChoiceBoxItems(new String[]{"Назвою", "Кількістю", "Категорією"}, new String[]{"UPC", "Назвою"});
     }
     @FXML
     public void productsButtonOnAction(ActionEvent actionEvent) {
         removeSearchProductTables();
         productsTablesContainer.getChildren().add(allProductsTable);
         productsAllButton.setDisable(true);
+        setChoiceBoxItems(new String[]{"Назвою", "Категорією"}, new String[]{"ID", "Назвою"});
+    }
+
+    private void setChoiceBoxItems(String[] sort, String[] search) {
+        sortByChoiceBox.setItems(FXCollections.observableArrayList(sort));
+        sortByChoiceBox.getSelectionModel().select(sort[0]);
+
+        searchByChoiceBox.setItems(FXCollections.observableArrayList(search));
+        searchByChoiceBox.getSelectionModel().select(search[0]);
     }
 
     @FXML
@@ -646,12 +680,12 @@ public class CashierMenuViewController {
 
     private void showSelectedCheckInfo(String query) throws IOException {
         Receipt receipt = DatabaseManager.getReceiptByID(database, query);
-        if(receipt == null || receipt.getProducts() == null || receipt.getProducts().isEmpty()) DatabaseManager.showError("Чек з номером "+query+" не знайдено");
+        if(receipt == null || receipt.getProducts() == null || receipt.getProducts().isEmpty()) DatabaseManager.showSQLError("Чек з номером "+query+" не знайдено");
         else {
             CheckViewController.receipt = receipt;
             MenuChanger.changeMenu(MenuChanger.LoaderClass.CashierView,
                     "check-search-view.fxml",
-                    "Огляд чеку");
+                    "Пошук чеку");
         }
 
     }
@@ -660,7 +694,7 @@ public class CashierMenuViewController {
     public void openFiltersMenu(ActionEvent actionEvent) throws IOException {
         MenuChanger.changeMenu(MenuChanger.LoaderClass.CashierView,
                 "products-filters-view.fxml",
-                "Додати товар до чеку");
+                "Фільтри");
     }
 
     @FXML

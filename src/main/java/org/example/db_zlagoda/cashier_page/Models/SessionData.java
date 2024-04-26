@@ -6,13 +6,11 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import org.example.db_zlagoda.cashier_page.Controllers.CashierMenuViewController;
+import org.example.db_zlagoda.cashier_page.Controllers.ControllerAccess;
 import org.example.db_zlagoda.db_data.DatabaseManager;
 import org.example.db_zlagoda.utils.Exceptions.NegativeAmountException;
 import org.example.db_zlagoda.utils.receipt_tools.Receipt;
-import org.example.db_zlagoda.utils.tableview_tools.CategoryItem;
-import org.example.db_zlagoda.utils.tableview_tools.ClientItem;
-import org.example.db_zlagoda.utils.tableview_tools.ProductInfo;
-import org.example.db_zlagoda.utils.tableview_tools.ProductItem;
+import org.example.db_zlagoda.utils.tableview_tools.*;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -24,6 +22,8 @@ public class SessionData {
     private FilteredList<ProductItem> filteredProducts;
     private FilteredList<ProductInfo> filteredAllProducts;
     private FilteredList<CategoryItem> filteredCategories;
+
+
     private ObservableList<ProductInfo> allProducts;
     private ObservableList<CategoryItem> categories;
     private ObservableList<ClientItem> clients;
@@ -39,22 +39,7 @@ public class SessionData {
         filteredAllProducts = new FilteredList<>(allProducts);
         filteredCategories = new FilteredList<>(categories);
 
-//        products.addListener((ListChangeListener<ProductItem>) c -> {
-//            System.out.println("jdlkasjd");
-//            filteredProducts.clear();
-//            filteredProducts.addAll(c.getList());
-//
-//        });
-//        allProducts.addListener((ListChangeListener<ProductInfo>) c -> {
-//            filteredAllProducts.clear();
-//            filteredAllProducts.addAll(c.getList());
-//
-//        });
-//        categories.addListener((ListChangeListener<CategoryItem>) c -> {
-//            filteredCategories.clear();
-//            filteredCategories.addAll(c.getList());
-//
-//        });
+
 
         loadClients();
         loadProducts();
@@ -68,6 +53,28 @@ public class SessionData {
         products.addAll(DatabaseManager.getProductTableItems(CashierMenuViewController.database));
         allProducts.addAll(DatabaseManager.getAllProductTableItems(CashierMenuViewController.database));
         categories.addAll(DatabaseManager.getCategoryTableItems(CashierMenuViewController.database));
+        filteredProducts.setPredicate(s -> s.getAmount() > 0);
+    }
+
+    public void loadProducts(FilterQuery query) {
+
+        if(query == null) {
+            loadProducts();
+            return;
+        }
+
+        if(query.tableType().equals("categories")) {
+            categories.clear();
+            categories.addAll(DatabaseManager.getFilteredCategoryTableItems(query, CashierMenuViewController.database));
+        } else if (query.tableType().equals("products")) {
+            products.clear();
+            products.addAll(DatabaseManager.getFilteredProducts(query, CashierMenuViewController.database));
+            filteredProducts.setPredicate(s -> s.getAmount() > 0);
+        } else {
+            allProducts.clear();
+            allProducts.addAll(DatabaseManager.getFilteredAllProductTableItems(query, CashierMenuViewController.database));
+        }
+
     }
 
     private void loadClients() {

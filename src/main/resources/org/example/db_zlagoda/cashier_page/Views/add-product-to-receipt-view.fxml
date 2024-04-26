@@ -11,10 +11,41 @@
                 <Label text="Додати товари до чеку" />
                 <VBox>
                     <children>
-                        <HBox alignment="CENTER_LEFT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="45.0" prefWidth="900.0" spacing="5.0">
+                        <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" nodeOrientation="RIGHT_TO_LEFT" prefHeight="60.0" prefWidth="900.0" spacing="5.0">
                             <children>
-                                <Button onAction="#openFiltersMenu" maxHeight="1.7976931348623157E308" mnemonicParsing="false" text="Фільтри" />
-                                <TextArea fx:id="productSearchQuery" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                                <Button maxHeight="-Infinity" mnemonicParsing="false" onAction="#openFiltersMenu" prefHeight="25.0" text="Фільтри">
+                                    <HBox.margin>
+                                        <Insets top="8.0" />
+                                    </HBox.margin>
+                                </Button>
+                                <Button maxHeight="-Infinity" mnemonicParsing="false" onAction="#filterProducts" prefHeight="25.0" text="Шукати">
+                                    <HBox.margin>
+                                        <Insets top="8.0" />
+                                    </HBox.margin>
+                                </Button>
+                                <TextArea fx:id="productSearchQuery" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefHeight="25.0" prefWidth="500.0" HBox.hgrow="ALWAYS">
+                                    <HBox.margin>
+                                        <Insets top="8.0" />
+                                    </HBox.margin>
+                                </TextArea>
+                                <VBox maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="100.0">
+                                    <children>
+                                        <Label alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Пошук за" />
+                                        <ChoiceBox fx:id="searchByChoiceBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
+                                    </children>
+                                    <HBox.margin>
+                                        <Insets left="5.0" />
+                                    </HBox.margin>
+                                </VBox>
+                                <VBox maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="100.0">
+                                    <children>
+                                        <Label alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Сортування за" />
+                                        <ChoiceBox fx:id="sortByChoiceBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
+                                    </children>
+                                    <HBox.margin>
+                                        <Insets left="5.0" />
+                                    </HBox.margin>
+                                </VBox>
                             </children>
                             <padding>
                                 <Insets bottom="5.0" top="5.0" />

@@ -1,5 +1,6 @@
 package org.example.db_zlagoda.utils.tableview_tools;
 
+import org.example.db_zlagoda.DatabaseConnection;
 import org.example.db_zlagoda.cashier_page.Controllers.CashierMenuViewController;
 import org.example.db_zlagoda.cashier_page.Controllers.ControllerAccess;
 import org.example.db_zlagoda.db_data.DatabaseManager;
@@ -34,6 +35,8 @@ public class ProductItem{
         this.amount = amount;
         this.price = price;
         this.category = category;
+        this.promotionalProduct = promotionalProduct;
+        setOnSale();
     }
 
     public int getPromotionalProduct() {
@@ -45,7 +48,7 @@ public class ProductItem{
     }
 
     private CategoryItem setCategoryByID(int id) throws SQLException {
-        return DatabaseManager.getCategoryByID(id);
+        return DatabaseManager.getCategoryByID(new DatabaseConnection().getConnection(), id);
     }
     public CategoryItem getCategory() {
         return category;
@@ -72,8 +75,7 @@ public class ProductItem{
     }
 
     public double getPrice() {
-        if(promotionalProduct == 1) return price * 0.8;
-        else return price;
+        return price;
     }
 
     public void setSaleUpc(String saleUpc) {
