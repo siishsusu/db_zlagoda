@@ -9,9 +9,7 @@ import javafx.scene.control.TableView;
 import org.example.db_zlagoda.DatabaseConnection;
 
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ResourceBundle;
 
 
@@ -43,53 +41,50 @@ public class CheckViewController implements Initializable {
         setTable();
     }
 
-    private String finalPrice(){
+    private String finalPrice() {
         String finalPrice = "";
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-            // Загальна вартість чеку за його номером
-            ResultSet checks_information = statement.executeQuery(
-                    "SELECT sum_total " +
-                            "FROM `check` " +
-                            "WHERE check_number = '" + CHECK_NUMBER + "' " );
+        try (Connection connectDB = DatabaseConnection.getConnection();
+             PreparedStatement statement = connectDB.prepareStatement(
+                     "SELECT sum_total " +
+                             "FROM `check` " +
+                             "WHERE check_number = ?")) {
+
+            statement.setString(1, CHECK_NUMBER);
+            ResultSet checks_information = statement.executeQuery();
+
             if (checks_information.next()) {
                 finalPrice = checks_information.getString("sum_total");
             }
-        }catch (Exception e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return finalPrice;
     }
 
-    private void setTable(){
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-            // 17. Отримати інформацію про усі чеки, створені певним касиром за певний період
-            // часу (з можливістю перегляду куплених товарів у цьому чеку, їх назви, к-сті та ціни);
-            ResultSet checks_information = statement.executeQuery(
-                    "SELECT sale.UPC, sale.product_number, sale.selling_price, product_name " +
-                            "FROM sale " +
-                            "INNER JOIN store_product " +
-                            "ON store_product.UPC = sale.UPC " +
-                            "INNER JOIN product " +
-                            "ON product.id_product = store_product.id_product " +
-                            "WHERE check_number = '" + CHECK_NUMBER + "'");
+    private void setTable() {
+        try (Connection connectDB = DatabaseConnection.getConnection();
+             PreparedStatement statement = connectDB.prepareStatement(
+                     "SELECT sale.UPC, sale.product_number, sale.selling_price, product.product_name " +
+                             "FROM sale " +
+                             "INNER JOIN store_product ON store_product.UPC = sale.UPC " +
+                             "INNER JOIN product ON product.id_product = store_product.id_product " +
+                             "WHERE check_number = ?")) {
+
+            statement.setString(1, CHECK_NUMBER);
+            ResultSet checks_information = statement.executeQuery();
+
             while (checks_information.next()) {
-                Object[] rowData = {
-                        checks_information.getString("UPC"),
-                        checks_information.getString("product_name"),
-                        checks_information.getString("product_number"),
-                        checks_information.getString("selling_price"),
-                        String.valueOf(Double.parseDouble(checks_information.getString("selling_price")) * Double.parseDouble(checks_information.getString("product_number")))
-                };
+                String UPC = checks_information.getString("UPC");
+                String productName = checks_information.getString("product_name");
+                int productNumber = checks_information.getInt("product_number");
+                double sellingPrice = checks_information.getDouble("selling_price");
+                double totalPrice = sellingPrice * productNumber;
+
+                Object[] rowData = { UPC, productName, productNumber, sellingPrice, totalPrice };
                 checkTable.getItems().add(rowData);
             }
 
-        }catch (Exception e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }

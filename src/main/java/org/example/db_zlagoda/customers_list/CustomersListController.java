@@ -126,9 +126,9 @@ public class CustomersListController implements Initializable {
             while (cust_information.next()) {
                 Object[] rowData = {
                         cust_information.getString("card_number"),
-                        cust_information.getString("ПІБ"),
+                        cust_information.getString("pib"),
                         cust_information.getString("phone_number"),
-                        cust_information.getString("Адреса"),
+                        cust_information.getString("address"),
                         cust_information.getString("percent")
                 };
                 customersTable.getItems().add(rowData);
@@ -166,23 +166,26 @@ public class CustomersListController implements Initializable {
 
     private void fillFields(String id) {
         try {
-            ResultSet cust_information = executeQuery(
-                    "SELECT *" +
-                            "FROM customer_card " +
-                            "WHERE card_number = '" + id + "'");
+            String query = "SELECT * FROM customer_card WHERE card_number = ?";
+            try (Connection connectDB = DatabaseConnection.getConnection();
+                 PreparedStatement statement = connectDB.prepareStatement(query)) {
 
-            if (cust_information.next()) {
-                surnameField.setText(cust_information.getString("cust_surname"));
-                nameField.setText(cust_information.getString("cust_name"));
-                patronymicField.setText(cust_information.getString("cust_patronymic"));
-                phoneField.setText(cust_information.getString("phone_number"));
-                cityField.setText(cust_information.getString("city"));
-                streetField.setText(cust_information.getString("street"));
-                zipCodeField.setText(cust_information.getString("zip_code"));
-                percentField.setText(cust_information.getString("percent"));
+                statement.setString(1, id);
+                ResultSet cust_information = statement.executeQuery();
+
+                if (cust_information.next()) {
+                    surnameField.setText(cust_information.getString("cust_surname"));
+                    nameField.setText(cust_information.getString("cust_name"));
+                    patronymicField.setText(cust_information.getString("cust_patronymic"));
+                    phoneField.setText(cust_information.getString("phone_number"));
+                    cityField.setText(cust_information.getString("city"));
+                    streetField.setText(cust_information.getString("street"));
+                    zipCodeField.setText(cust_information.getString("zip_code"));
+                    percentField.setText(cust_information.getString("percent"));
+                }
             }
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }

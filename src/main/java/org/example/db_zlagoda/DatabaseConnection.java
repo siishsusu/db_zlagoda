@@ -5,9 +5,9 @@ import org.example.db_zlagoda.utils.tableview_tools.ClientItem;
 import java.sql.*;
 
 public class DatabaseConnection {
-    public Connection databaseLink;
+    public static Connection databaseLink;
 
-    public Connection getConnection(){
+    public static Connection getConnection(){
         String databaseName = "zzlagoda_db",
                 databaseUser = "root",
                 databasePassword = "Yellow768215!",

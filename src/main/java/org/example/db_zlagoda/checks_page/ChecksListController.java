@@ -25,10 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -327,21 +324,21 @@ public class ChecksListController implements Initializable {
         }
     }
 
-    private void findEmployee(){
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-            // Витягує id працівників для "розумного пошуку"
-            ResultSet employees_information = statement.executeQuery(
-                    "SELECT CONCAT(empl_surname, ' ', empl_name, ' ', empl_patronymic) AS PIB " +
-                            "FROM employee WHERE id_employee = '" + employee_field.getText() + "'");
+    private void findEmployee() {
+        try (Connection connectDB = DatabaseConnection.getConnection();
+             PreparedStatement statement = connectDB.prepareStatement(
+                     "SELECT CONCAT(empl_surname, ' ', empl_name, ' ', empl_patronymic) AS PIB " +
+                             "FROM employee WHERE id_employee = ?")) {
+
+            statement.setString(1, employee_field.getText());
+            ResultSet employees_information = statement.executeQuery();
+
             String pib = "";
             while (employees_information.next()) {
-                pib = (employees_information.getString("PIB"));
+                pib = employees_information.getString("PIB");
             }
             nameLabel.setText(pib);
-        }catch (Exception e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -384,26 +381,31 @@ public class ChecksListController implements Initializable {
         }
     }
 
-    private void findProduct(){
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
-            ResultSet products_information = statement.executeQuery(
-                    "SELECT * FROM store_product " +
-                            "INNER JOIN product " +
-                            "ON product.id_product = store_product.id_product " +
-                            "WHERE UPC = '" + employee_field.getText() + "'");
-            String nameOfProduct = "", promotion = "";
+    private void findProduct() {
+        try (Connection connectDB = DatabaseConnection.getConnection();
+             PreparedStatement statement = connectDB.prepareStatement(
+                     "SELECT * FROM store_product " +
+                             "INNER JOIN product " +
+                             "ON product.id_product = store_product.id_product " +
+                             "WHERE UPC = ?")) {
+
+            statement.setString(1, employee_field.getText());
+            ResultSet products_information = statement.executeQuery();
+
+            String nameOfProduct = "";
+            boolean isPromotional = false;
+
             while (products_information.next()) {
-                nameOfProduct = (products_information.getString("product_name"));
-                promotion = (products_information.getString("promotional_product"));
+                nameOfProduct = products_information.getString("product_name");
+                isPromotional = products_information.getBoolean("promotional_product");
             }
-            if(promotion.equals("1")){
+
+            if (isPromotional) {
                 nameOfProduct += " (акція)";
             }
             nameLabel.setText(nameOfProduct);
-        }catch (Exception e){
+
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }

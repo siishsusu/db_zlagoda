@@ -153,8 +153,8 @@ public class DatabaseManager_mm {
                              "VALUES (?, ?, ?, ?)")) {
             statement.setString(1, id_product);
             statement.setInt(2, category_number);
-            statement.setString(3, product_name);
-            statement.setString(4, characteristics);
+            statement.setString(3, (product_name));
+            statement.setString(4, escapeString(characteristics));
 
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -254,29 +254,47 @@ public class DatabaseManager_mm {
                                       String newRole, String newSalary, String newBirthDate, String newStartWorkDate,
                                       String newPhoneNumber, String newCity, String newStreet, String newZipCode,
                                       String newUsername) {
+        String updateEmployeeQuery = "UPDATE employee SET " +
+                "empl_surname = ?, " +
+                "empl_name = ?, " +
+                "empl_patronymic = ?, " +
+                "empl_role = ?, " +
+                "salary = ?, " +
+                "date_of_birth = ?, " +
+                "date_of_start = ?, " +
+                "phone_number = ?, " +
+                "city = ?, " +
+                "street = ?, " +
+                "zip_code = ? " +
+                "WHERE id_employee = ?";
+
+        String updateUsernameQuery = "UPDATE login_table " +
+                "SET username = ? " +
+                "WHERE id_employee = ?";
+
         try (Connection connection = getConnection();
-             Statement statement = connection.createStatement()) {
+             PreparedStatement statementEmployee = connection.prepareStatement(updateEmployeeQuery);
+             PreparedStatement statementUsername = connection.prepareStatement(updateUsernameQuery)) {
 
-            String updateQuery = "UPDATE employee SET " +
-                    "empl_surname = '" + newLastName + "', " +
-                    "empl_name = '" + newFirstName + "', " +
-                    "empl_patronymic = '" + newPatronymic + "', " +
-                    "empl_role = '" + newRole + "', " +
-                    "salary = '" + newSalary + "', " +
-                    "date_of_birth = '" + newBirthDate + "', " +
-                    "date_of_start = '" + newStartWorkDate + "', " +
-                    "phone_number = '" + newPhoneNumber + "', " +
-                    "city = '" + newCity + "', " +
-                    "street = '" + newStreet + "', " +
-                    "zip_code = '" + newZipCode + "' " +
-                    "WHERE id_employee = '" + employeeId + "'";
+            statementEmployee.setString(1, newLastName);
+            statementEmployee.setString(2, newFirstName);
+            statementEmployee.setString(3, newPatronymic);
+            statementEmployee.setString(4, newRole);
+            statementEmployee.setString(5, newSalary);
+            statementEmployee.setString(6, newBirthDate);
+            statementEmployee.setString(7, newStartWorkDate);
+            statementEmployee.setString(8, newPhoneNumber);
+            statementEmployee.setString(9, newCity);
+            statementEmployee.setString(10, newStreet);
+            statementEmployee.setString(11, newZipCode);
+            statementEmployee.setString(12, employeeId);
 
-            statement.executeUpdate(updateQuery);
+            statementEmployee.executeUpdate();
 
-            String updateUsername = "UPDATE login_table " +
-                    "SET username = '" + newUsername + "' " +
-                    "WHERE id_employee = '" + employeeId + "'";
-            statement.executeUpdate(updateUsername);
+            statementUsername.setString(1, newUsername);
+            statementUsername.setString(2, employeeId);
+
+            statementUsername.executeUpdate();
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -601,12 +619,14 @@ public class DatabaseManager_mm {
 
     private static String getSelectedEmployeeFullName() {
         String fullName = "";
-        try {
-            ResultSet resultSet = executeQuery(
-                    "SELECT CONCAT(empl_surname, ' ', empl_name, ' ', empl_patronymic) AS pib " +
-                            "FROM employee WHERE id_employee = '" + selectedEmployeeID + "'");
+        String query = "SELECT CONCAT(empl_surname, ' ', empl_name, ' ', empl_patronymic) AS full_name " +
+                "FROM employee WHERE id_employee = ?";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, selectedEmployeeID);
+            ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                fullName = resultSet.getString("pib");
+                fullName = resultSet.getString("full_name");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -903,9 +923,9 @@ public class DatabaseManager_mm {
     public static ResultSet getCustomersInformation() throws SQLException {
         return executeQuery(
                 "SELECT card_number, " +
-                        "CONCAT(cust_surname, ' ', cust_name, ' ', cust_patronymic) AS ПІБ, " +
+                        "CONCAT(cust_surname, ' ', cust_name, ' ', cust_patronymic) AS pib, " +
                         "phone_number, " +
-                        "CONCAT('м. ', city, ', вул. ', street, ', поштовий індекс : ', zip_code, percent) AS Адреса, " +
+                        "CONCAT('м. ', city, ', вул. ', street, ', поштовий індекс : ', zip_code, percent) AS address, " +
                         "percent " +
                         "FROM customer_card " +
                         "ORDER BY cust_surname"
@@ -961,78 +981,91 @@ public class DatabaseManager_mm {
 
     // 11. За прізвищем працівника знайти його телефон та адресу;
     public static ResultSet getEmployeesInformation_bySurname(String surname) throws SQLException {
-        return executeQuery(
-                "SELECT empl_surname, city, street, phone_number " +
-                        "FROM employee " +
-                        "WHERE empl_surname = '" + surname + "'"
-        );
+        String query = "SELECT empl_surname, city, street, phone_number " +
+                "FROM employee " +
+                "WHERE empl_surname = ?";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, surname);
+        return statement.executeQuery();
     }
 
     // 12. Отримати інформацію про усіх постійних клієнтів, що мають карту клієнта із певним відсотком, посортованих за прізвищем;
     public static ResultSet getCustomersInformation_byPercent(String percent) throws SQLException {
-        return executeQuery(
-                "SELECT card_number, " +
-                        "CONCAT(cust_surname, ' ', cust_name, ' ', cust_patronymic) AS ПІБ, " +
-                        "phone_number, " +
-                        "CONCAT('м. ', city, ', вул. ', street, ', поштовий індекс : ', zip_code, percent) AS Адреса, " +
-                        "percent " +
-                        "FROM customer_card " +
-                        "WHERE percent = " + "'" + percent + "'" +
-                        "ORDER BY cust_surname"
-        );
+        String query = "SELECT card_number, " +
+                "CONCAT(cust_surname, ' ', cust_name, ' ', cust_patronymic) AS pib, " +
+                "phone_number, " +
+                "CONCAT('м. ', city, ', вул. ', street, ', поштовий індекс: ', zip_code) AS address, " +
+                "percent " +
+                "FROM customer_card " +
+                "WHERE percent = ? " +
+                "ORDER BY cust_surname";
+
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, percent);
+        return statement.executeQuery();
     }
 
     // 13. Здійснити пошук усіх товарів, що належать певній категорії, відсортованих за назвою;
     public static ResultSet searchByCategory(String option, String value) throws SQLException {
-        return executeQuery(
-                "SELECT product.id_product, product.category_number, " +
-                        "category.category_name, product.product_name, " +
-                        "product.characteristics " +
-                        "FROM product " +
-                        "INNER JOIN category " +
-                        "ON category.category_number = product.category_number " +
-                        "WHERE category." + option + " = '" + value + "'" +
-                        "ORDER BY product.product_name;"
-        );
+        String query = "SELECT product.id_product, product.category_number, " +
+                "category.category_name, product.product_name, " +
+                "product.characteristics " +
+                "FROM product " +
+                "INNER JOIN category " +
+                "ON category.category_number = product.category_number " +
+                "WHERE category." + option + " = ? " +
+                "ORDER BY product.product_name";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, value);
+        return statement.executeQuery();
     }
 
     // 14. За UPC-товару знайти ціну продажу товару, кількість наявних одиниць товару, назву та характеристики товару;
     public static ResultSet searchByUPC(String UPC) throws SQLException {
-        return executeQuery(
-                "SELECT product.product_name, product.characteristics, " +
-                        "selling_price, products_number " +
-                        "FROM store_product " +
-                        "INNER JOIN product " +
-                        "ON product.id_product = store_product.id_product " +
-                        "WHERE UPC = '" + UPC + "'"
-        );
+        String query = "SELECT product.product_name, product.characteristics, " +
+                "selling_price, products_number " +
+                "FROM store_product " +
+                "INNER JOIN product " +
+                "ON product.id_product = store_product.id_product " +
+                "WHERE UPC = ?";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, UPC);
+        return statement.executeQuery();
     }
 
     // 15. Отримати інформацію про усі акційні товари, відсортовані за кількістю одиниць товару/ за назвою;
     private static ResultSet get_name(char promotion) throws SQLException {
-        return executeQuery(
-                "SELECT UPC, UPC_prom, store_product.id_product, " +
-                        "product.product_name, selling_price, " +
-                        "products_number, promotional_product " +
-                        "FROM store_product " +
-                        "INNER JOIN product " +
-                        "ON product.id_product = store_product.id_product " +
-                        "WHERE promotional_product = '" + promotion + "' " +
-                        "ORDER BY product_name, products_number;"
-        );
+        String query = "SELECT UPC, UPC_prom, store_product.id_product, " +
+                "product.product_name, selling_price, " +
+                "products_number, promotional_product " +
+                "FROM store_product " +
+                "INNER JOIN product " +
+                "ON product.id_product = store_product.id_product " +
+                "WHERE promotional_product = ? " +
+                "ORDER BY product_name, products_number";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, String.valueOf(promotion));
+        return statement.executeQuery();
     }
 
     private static ResultSet get_quantity(char promotion) throws SQLException {
-        return executeQuery(
-                "SELECT UPC, UPC_prom, store_product.id_product, " +
-                        "product.product_name, selling_price, " +
-                        "products_number, promotional_product " +
-                        "FROM store_product " +
-                        "INNER JOIN product " +
-                        "ON product.id_product = store_product.id_product " +
-                        "WHERE promotional_product = '" + promotion + "' " +
-                        "ORDER BY products_number, product_name;"
-        );
+        String query = "SELECT UPC, UPC_prom, store_product.id_product, " +
+                "product.product_name, selling_price, " +
+                "products_number, promotional_product " +
+                "FROM store_product " +
+                "INNER JOIN product " +
+                "ON product.id_product = store_product.id_product " +
+                "WHERE promotional_product = ? " +
+                "ORDER BY products_number, product_name";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, String.valueOf(promotion));
+        return statement.executeQuery();
     }
 
     public static ResultSet getProductsInStoreInformation_prom_name () throws SQLException {
@@ -1060,69 +1093,91 @@ public class DatabaseManager_mm {
             result = executeQuery(
                     "SELECT * " +
                             "FROM `check` " +
-                            "WHERE id_employee = '" + id_empl_or_UPC + "' " +
-                            "AND print_date BETWEEN '" + startDate + "' " +
-                            "AND '" + endDate + "'"
+                            "WHERE id_employee = ? " +
+                            "AND print_date BETWEEN ? AND ?"
             );
         } else if (scene == 2) {
             result = executeQuery(
                     "SELECT * " +
                             "FROM `check` " +
                             "INNER JOIN sale ON sale.check_number = `check`.check_number " +
-                            "WHERE UPC = '" + id_empl_or_UPC + "' " +
-                            "AND print_date BETWEEN '" + startDate + "' " +
-                            "AND '" + endDate + "'"
+                            "WHERE UPC = ? " +
+                            "AND print_date BETWEEN ? AND ?"
             );
         }
+        try {
+            if (result != null) {
+                PreparedStatement statement = result.unwrap(PreparedStatement.class);
+                statement.setString(1, id_empl_or_UPC);
+                statement.setDate(2, Date.valueOf(startDate));
+                statement.setDate(3, Date.valueOf(endDate));
+                result = statement.executeQuery();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return result;
     }
 
     // 18. Отримати інформацію про усі чеки, створені усіма касирами за певний період часу (з можливістю
     // перегляду куплених товарів у цьому чеку, їх назва, к-сті та ціни);
-    public static ResultSet allChecks (LocalDate startDate, LocalDate endDate) throws SQLException {
-        return executeQuery(
-                "SELECT * " +
-                        "FROM `check` " +
-                        "WHERE print_date BETWEEN '" + startDate + "' " +
-                        "AND '" + endDate + "'"
-        );
+    public static ResultSet allChecks(LocalDate startDate, LocalDate endDate) throws SQLException {
+        String query = "SELECT * " +
+                "FROM `check` " +
+                "WHERE print_date BETWEEN ? AND ?";
+
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setDate(1, Date.valueOf(startDate));
+        statement.setDate(2, Date.valueOf(endDate));
+        return statement.executeQuery();
     }
 
     // 19. Визначити загальну суму проданих товарів з чеків, створених певним касиром за певний період часу;
     public static ResultSet totalSum_byCashier(String id_empl, LocalDate startDate, LocalDate endDate) throws SQLException {
-        return executeQuery(
-                "SELECT SUM(sum_total) AS total_sales_price " +
-                        "FROM `check` " +
-                        "WHERE id_employee = '" + id_empl + "' " +
-                        "AND print_date " +
-                        "BETWEEN '" + startDate + "' " +
-                        "AND '" + endDate + "'"
-        );
+        String query = "SELECT SUM(sum_total) AS total_sales_price " +
+                "FROM `check` " +
+                "WHERE id_employee = ? " +
+                "AND print_date BETWEEN ? AND ?";
+
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, id_empl);
+        statement.setDate(2, Date.valueOf(startDate));
+        statement.setDate(3, Date.valueOf(endDate));
+        return statement.executeQuery();
     }
 
     // 20. Визначити загальну суму проданих товарів з чеків, створених усіма касиром за певний період часу;
-    public static ResultSet totalSum_all (LocalDate startDate, LocalDate endDate) throws SQLException {
-        return executeQuery(
-                "SELECT SUM(sum_total) AS total_sales_price " +
-                        "FROM `check` " +
-                        "WHERE print_date " +
-                        "BETWEEN '" + startDate + "' " +
-                        "AND '" + endDate + "'"
-        );
+    public static ResultSet totalSum_all(LocalDate startDate, LocalDate endDate) throws SQLException {
+        String query = "SELECT SUM(sum_total) AS total_sales_price " +
+                "FROM `check` " +
+                "WHERE print_date BETWEEN ? AND ?";
+
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setDate(1, Date.valueOf(startDate));
+        statement.setDate(2, Date.valueOf(endDate));
+        return statement.executeQuery();
     }
 
     // 21. Визначити загальну кількість одиниць певного товару, проданого за певний період часу.
     public static ResultSet totalQuality(String upc, LocalDate startDate, LocalDate endDate) throws SQLException {
-        return executeQuery(
-                "SELECT SUM(s.product_number) AS total_quantity_sold " +
-                        "FROM `check` c " +
-                        "INNER JOIN sale s " +
-                        "ON c.check_number = s.check_number " +
-                        "WHERE s.UPC = '" + upc + "' AND print_date " +
-                        "BETWEEN '" + startDate + "' " +
-                        "AND '" + endDate + "'"
-        );
+        String query = "SELECT SUM(s.product_number) AS total_quantity_sold " +
+                "FROM `check` c " +
+                "INNER JOIN sale s " +
+                "ON c.check_number = s.check_number " +
+                "WHERE s.UPC = ? AND print_date BETWEEN ? AND ?";
+
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, upc);
+        statement.setDate(2, Date.valueOf(startDate));
+        statement.setDate(3, Date.valueOf(endDate));
+        return statement.executeQuery();
     }
+
 
 
     // додаткові методи
@@ -1132,5 +1187,10 @@ public class DatabaseManager_mm {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    // якщо додається щось, що містить апостроф в назві
+    public static String escapeString(String value) {
+        return value.replace("'", "''");
     }
 }

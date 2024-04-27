@@ -39,46 +39,43 @@ public class LoginController {
     private PasswordField PasswordTextField;
 
     public void validateLogin() {
-        DatabaseConnection connection = new DatabaseConnection();
-        Connection connectDB = connection.getConnection();
+        try (Connection connectDB = DatabaseConnection.getConnection()) {
+            String username_str = userNameTextField.getText();
+            String password_str = RegistrationController.hashPassword(PasswordTextField.getText());
 
-        String username_str = userNameTextField.getText();
-        String password_str = RegistrationController.hashPassword(PasswordTextField.getText());
-        // Верифікація працівників
-        String verifyLogin = "SELECT * FROM login_table WHERE username = '" + username_str +
-                "' AND password = '" + password_str + "'";
+            // Верифікація працівників
+            String verifyLogin = "SELECT * FROM login_table WHERE username = ? AND password = ?";
+            try (PreparedStatement statement = connectDB.prepareStatement(verifyLogin)) {
+                statement.setString(1, username_str);
+                statement.setString(2, password_str);
+                ResultSet resultQuery = statement.executeQuery();
 
-        try {
-            Statement statement = connectDB.createStatement();
-            ResultSet resultQuery = statement.executeQuery(verifyLogin);
+                if (resultQuery.next()) {
+                    String id_employee = resultQuery.getString("id_employee");
+                    String positionQuery = "SELECT empl_role FROM employee WHERE id_employee = ?";
+                    try (PreparedStatement positionStatement = connectDB.prepareStatement(positionQuery)) {
+                        positionStatement.setString(1, id_employee);
+                        ResultSet positionResult = positionStatement.executeQuery();
 
-            if (resultQuery.next()) {
-                String id_employee = resultQuery.getString("id_employee");
-                String positionQuery = "SELECT empl_role FROM employee WHERE id_employee ='" + id_employee + "'";
-                ResultSet positionResult = statement.executeQuery(positionQuery);
-
-                if (positionResult.next()) {
-                    String role = positionResult.getString("empl_role");
-                    if(role.equals("Касир")){
-                        Stage stage = (Stage) cancelButton.getScene().getWindow();
-                        stage.close();
-                        cashierScreen(id_employee);
-                    }else{
-                        Stage stage = (Stage) cancelButton.getScene().getWindow();
-                        stage.close();
-                        managerScreen();
+                        if (positionResult.next()) {
+                            String role = positionResult.getString("empl_role");
+                            if(role.equals("Касир")){
+                                Stage stage = (Stage) cancelButton.getScene().getWindow();
+                                stage.close();
+                                cashierScreen(id_employee);
+                            } else {
+                                Stage stage = (Stage) cancelButton.getScene().getWindow();
+                                stage.close();
+                                managerScreen();
+                            }
+                        } else {
+                            invalidUserInfoError.setText("Помилка при пошуку посади.");
+                        }
                     }
                 } else {
-                    invalidUserInfoError.setText("Error fetching employee role.");
+                    invalidUserInfoError.setText("Неправильний username або пароль.");
                 }
-
-                positionResult.close();
-            } else {
-                invalidUserInfoError.setText("Invalid username or password.");
             }
-
-            resultQuery.close();
-            statement.close();
         } catch (SQLException error) {
             error.printStackTrace();
         }
@@ -102,39 +99,35 @@ public class LoginController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/cashier_page/Views/cashier-menu-view.fxml"));
             Parent root = loader.load();
 
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            String cashierInfo = "SELECT * FROM employee WHERE id_employee ='" + id_employee + "'";
+            try (Connection connectDB = DatabaseConnection.getConnection()) {
+                String cashierInfo = "SELECT * FROM employee WHERE id_employee = ?";
+                try (PreparedStatement statement = connectDB.prepareStatement(cashierInfo)) {
+                    statement.setString(1, id_employee);
+                    ResultSet resultQuery = statement.executeQuery();
 
-            try {
-                Statement statement = connectDB.createStatement();
-                ResultSet resultQuery = statement.executeQuery(cashierInfo);
+                    if (resultQuery.next()) {
+                        String id_cashier = resultQuery.getString("id_employee");
+                        String cashierSurname = resultQuery.getString("empl_surname");
+                        String cashierName = resultQuery.getString("empl_name");
+                        String cashierPatronymic = resultQuery.getString("empl_patronymic");
+                        String PIB = cashierSurname + " " + cashierName + " " + cashierPatronymic;
+                        String cashierRole = resultQuery.getString("empl_role");
+                        String cashierSalary = resultQuery.getString("salary") + " грн";
+                        String cashierFirstDay = resultQuery.getString("date_of_start");
+                        String cashierBirthDate = resultQuery.getString("date_of_birth");
+                        String cashierPhoneNumber = resultQuery.getString("phone_number");
+                        String cashierCity = resultQuery.getString("city");
+                        String cashierStreet = resultQuery.getString("street");
+                        String cashierZipCode = resultQuery.getString("zip_code");
+                        String address = "м. " + cashierCity + ", вул. " + cashierStreet + ", індекс: " + cashierZipCode;
 
-                if (resultQuery.next()) {
-                    String id_cashier = resultQuery.getString("id_employee");
-                    String cashierSurname = resultQuery.getString("empl_surname"),
-                            cashierName = resultQuery.getString("empl_name"),
-                            cashierPatronymic = resultQuery.getString("empl_patronymic");
-                    String PIB = cashierSurname + " " + cashierName + " " + cashierPatronymic;
-                    String cashierRole = resultQuery.getString("empl_role");
-                    String cashierSalary = resultQuery.getString("salary") + " грн";
-                    String cashierFirstDay = resultQuery.getString("date_of_start");
-                    String cashierBirthDate = resultQuery.getString("date_of_birth");
-                    String cashierPhoneNumber = resultQuery.getString("phone_number");
-                    String cashierCity = resultQuery.getString("city"),
-                            cashierStreet = resultQuery.getString("street"),
-                            cashierZipCode = resultQuery.getString("zip_code");
-                    String address = "м. " + cashierCity + ", вул. " + cashierStreet + ", індекс: " + cashierZipCode;
-
-                    CashierMenuViewController controller = loader.getController();
-                    controller.setUserInfo(id_cashier, PIB, cashierRole, cashierSalary, cashierFirstDay, cashierBirthDate, cashierPhoneNumber, address);
-                } else {
-                    invalidUserInfoError.setText("Invalid username or password.");
+                        CashierMenuViewController controller = loader.getController();
+                        controller.setUserInfo(id_cashier, PIB, cashierRole, cashierSalary, cashierFirstDay, cashierBirthDate, cashierPhoneNumber, address);
+                    } else {
+                        invalidUserInfoError.setText("Invalid username or password.");
+                    }
                 }
-
-                resultQuery.close();
-                statement.close();
-            } catch (SQLException error) {
+        } catch (SQLException error) {
                 error.printStackTrace();
             }
 

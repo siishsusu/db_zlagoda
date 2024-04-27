@@ -10,10 +10,7 @@ import org.example.db_zlagoda.DatabaseConnection;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ResourceBundle;
 
 import static org.example.db_zlagoda.db_data.DatabaseManager_mm.*;
@@ -150,63 +147,53 @@ public class CategoryPageController implements Initializable {
         }
     }
 
-
     private void fillFields(String id) {
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
+        try (Connection connectDB = DatabaseConnection.getConnection();
+             PreparedStatement statement = connectDB.prepareStatement(
+                     "SELECT * FROM category WHERE category_number = ?")) {
 
-            ResultSet cust_information = statement.executeQuery(
-                    "SELECT *" +
-                            "FROM category " +
-                            "WHERE category_number = '" + id + "'");
+            statement.setString(1, id);
+            ResultSet cust_information = statement.executeQuery();
 
             if (cust_information.next()) {
                 updateNameField.setText(cust_information.getString("category_name"));
             }
-
-            statement.close();
-            connectDB.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     @FXML
-    public void deleteButtonOnAction (ActionEvent event) throws IOException {
-        try{
+    public void deleteButtonOnAction(ActionEvent event) throws IOException {
+        try {
             Object[] selectedCustomer = categoriesTable.getSelectionModel().getSelectedItem();
             if (selectedCustomer != null) {
                 String id = selectedCustomer[0].toString();
 
-                DatabaseConnection connection = new DatabaseConnection();
-                Connection connectDB = connection.getConnection();
-                Statement statement = connectDB.createStatement();
+                try (Connection connectDB = DatabaseConnection.getConnection();
+                     PreparedStatement productCountStatement = connectDB.prepareStatement(
+                             "SELECT COUNT(*) FROM product WHERE category_number = ?");
+                     Statement statement = connectDB.createStatement()) {
 
-                // 3. Видаляти дані про категорії товарів
-                String checkProductsQuery = "SELECT COUNT(*) FROM product WHERE category_number = '" + id + "'";
-                ResultSet resultSet = statement.executeQuery(checkProductsQuery);
-                resultSet.next();
-                int productCount = resultSet.getInt(1);
+                    productCountStatement.setString(1, id);
+                    ResultSet resultSet = productCountStatement.executeQuery();
+                    resultSet.next();
+                    int productCount = resultSet.getInt(1);
 
-                if (productCount > 0) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Помилка");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Неможливо видалити категорію, оскільки вона містить товари.");
-                    alert.showAndWait();
-                } else {
-                    deleteCategory(id);
-
-                    clearTable();
-                    loadCategoriesData();
+                    if (productCount > 0) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Помилка");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Неможливо видалити категорію, оскільки вона містить товари.");
+                        alert.showAndWait();
+                    } else {
+                        deleteCategory(id);
+                        clearTable();
+                        loadCategoriesData();
+                    }
                 }
-
-                clearTable();
-                loadCategoriesData();
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }

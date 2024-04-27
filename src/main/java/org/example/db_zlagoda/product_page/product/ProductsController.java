@@ -28,10 +28,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -179,69 +176,66 @@ public class ProductsController implements Initializable {
     }
 
     @FXML
-    public void addToStoreButtonOnAction (ActionEvent event) throws IOException {
-        try{
+    public void addToStoreButtonOnAction(ActionEvent event) throws IOException {
+        try {
             Object[] selectedProduct = productsTable.getSelectionModel().getSelectedItem();
             if (selectedProduct != null) {
                 String id_prod_selected = selectedProduct[0].toString();
 
-                DatabaseConnection connection = new DatabaseConnection();
-                Connection connectDB = connection.getConnection();
-                Statement statement = connectDB.createStatement();
+                try (Connection connectDB = DatabaseConnection.getConnection()) {
 
-                // Додавати товар в магазин
+                    // Додавати товар в магазин
 
-                String checkProductsQuery = "SELECT COUNT(*) FROM store_product " +
-                        "WHERE id_product = '" + id_prod_selected + "'";
-                ResultSet resultSet = statement.executeQuery(checkProductsQuery);
-                resultSet.next();
-                int productCount = resultSet.getInt(1);
+                    String checkProductsQuery = "SELECT COUNT(*) FROM store_product WHERE id_product = ?";
+                    try (PreparedStatement countStatement = connectDB.prepareStatement(checkProductsQuery)) {
+                        countStatement.setString(1, id_prod_selected);
+                        ResultSet resultSet = countStatement.executeQuery();
+                        resultSet.next();
+                        int productCount = resultSet.getInt(1);
 
-                if (productCount == 2) {
-//                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
-//                    Parent root = loader.load();
-//                    ProductInStoreAddUpdateController controller = loader.getController();
+                        if (productCount == 2) {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-revaluate-view.fxml"));
+                            Parent root = loader.load();
+                            ProductInStoreRevaluateController controller = loader.getController();
 
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-revaluate-view.fxml"));
-                    Parent root = loader.load();
-                    ProductInStoreRevaluateController controller = loader.getController();
+                            ResultSet non_promUPC = null;
+                            try {
+                                String query = "SELECT UPC FROM store_product WHERE id_product = ? AND promotional_product = '0'";
+                                PreparedStatement statement = connectDB.prepareStatement(query);
+                                statement.setString(1, selectedProduct[0].toString());
+                                non_promUPC = statement.executeQuery();
+                                if (non_promUPC.next()) {
+                                    controller.fillFields(non_promUPC.getString("UPC"));
+                                    Stage stage = new Stage();
+                                    stage.setTitle("Переоцінка товару " + selectedProduct[3]);
+                                    stage.setScene(new Scene(root));
+                                    stage.show();
+                                }
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            } finally {
+                                if (non_promUPC != null) {
+                                    non_promUPC.close();
+                                }
+                            }
+                        } else {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
+                            Parent root = loader.load();
+                            ProductInStoreAddUpdateController controller = loader.getController();
+                            controller.add(null);
+                            controller.fillFields(id_prod_selected, true);
 
-                    // якщо обраний товар акційний, то відбувається пошук НЕакційного товару, що посилається на той
-                    // самий продукт
-                    ResultSet non_promUPC = statement.executeQuery(
-                            "SELECT UPC FROM store_product " +
-                                    "WHERE id_product = '" + selectedProduct[0] + "' AND " +
-                                    "promotional_product = '0'"
-                    );
-                    if (non_promUPC.next()){
-                        controller.fillFields(non_promUPC.getString("UPC"));
+                            Stage stage = new Stage();
+                            stage.setScene(new Scene(root));
+                            stage.show();
+
+                            clearTable();
+                            loadProductsData();
+                        }
+
+                        resultSet.close();
                     }
-
-                    Stage stage = new Stage();
-                    stage.setTitle("Переоцінка товару " + selectedProduct[3]);
-                    stage.setScene(new Scene(root));
-                    stage.show();
-                } else {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/db_zlagoda/product_page/product-in-store-add-update-view.fxml"));
-                    Parent root = loader.load();
-                    ProductInStoreAddUpdateController controller = loader.getController();
-                    controller.add(null);
-                    controller.fillFields(id_prod_selected, true);
-
-                    Stage stage = new Stage();
-                    stage.setScene(new Scene(root));
-                    stage.show();
-
-                    clearTable();
-                    loadProductsData();
                 }
-
-                resultSet.close();
-                statement.close();
-                connectDB.close();
-
-                clearTable();
-                loadProductsData();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -333,31 +327,29 @@ public class ProductsController implements Initializable {
 
     private int getCategoryNumber(String name) {
         int result = 0;
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
+        try (Connection connectDB = DatabaseConnection.getConnection();
+             PreparedStatement statement = connectDB.prepareStatement(
+                     "SELECT category_number " +
+                     "FROM category " +
+                     "WHERE category_name = ?")) {
 
-            ResultSet resultSet = statement.executeQuery("SELECT category_number FROM category WHERE category_name = '" + name + "'");
+            statement.setString(1, escapeString(name));
+            ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 result = resultSet.getInt("category_number");
             }
-
-            resultSet.close();
-            statement.close();
-            connectDB.close();
-            updateAddContainer.setVisible(false);
-
-            addButton.setDisable(false);
-            deleteButton.setDisable(false);
-            updateButton.setDisable(false);
-
-            clearTable();
-            loadProductsData();
-            cleanFields();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
+        updateAddContainer.setVisible(false);
+
+        addButton.setDisable(false);
+        deleteButton.setDisable(false);
+        updateButton.setDisable(false);
+
+        clearTable();
+        loadProductsData();
+        cleanFields();
         return result;
     }
 
@@ -368,39 +360,36 @@ public class ProductsController implements Initializable {
     }
 
     @FXML
-    public void deleteButtonOnAction (ActionEvent event) throws IOException {
-        try{
+    public void deleteButtonOnAction(ActionEvent event) throws IOException {
+        try {
             Object[] selectedProduct = productsTable.getSelectionModel().getSelectedItem();
             if (selectedProduct != null) {
                 String id_prod = selectedProduct[0].toString();
 
-                DatabaseConnection connection = new DatabaseConnection();
-                Connection connectDB = connection.getConnection();
-                Statement statement = connectDB.createStatement();
+                try (Connection connectDB = DatabaseConnection.getConnection();
+                     PreparedStatement productCountStatement = connectDB.prepareStatement(
+                             "SELECT COUNT(*) FROM store_product WHERE id_product = ?");
+                     Statement statement = connectDB.createStatement()) {
 
-                // 3. Видаляти дані про товари
-                String checkProductsQuery = "SELECT COUNT(*) FROM store_product WHERE id_product = '" + id_prod + "'";
-                ResultSet resultSet = statement.executeQuery(checkProductsQuery);
-                resultSet.next();
-                int productCount = resultSet.getInt(1);
+                    productCountStatement.setString(1, id_prod);
+                    ResultSet resultSet = productCountStatement.executeQuery();
+                    resultSet.next();
+                    int productCount = resultSet.getInt(1);
 
-                if (productCount > 0) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Помилка");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Неможливо видалити товар, оскільки він є в магазині.");
-                    alert.showAndWait();
-                } else {
-                    deleteProduct(id_prod);
-
-                    clearTable();
-                    loadProductsData();
+                    if (productCount > 0) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Помилка");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Неможливо видалити товар, оскільки він є в магазині.");
+                        alert.showAndWait();
+                    } else {
+                        deleteProduct(id_prod);
+                        clearTable();
+                        loadProductsData();
+                    }
                 }
-
-                clearTable();
-                loadProductsData();
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -425,29 +414,23 @@ public class ProductsController implements Initializable {
     }
 
     private void fillFields(String id) {
-        try {
-            DatabaseConnection connection = new DatabaseConnection();
-            Connection connectDB = connection.getConnection();
-            Statement statement = connectDB.createStatement();
+        try (Connection connectDB = DatabaseConnection.getConnection();
+             PreparedStatement statement = connectDB.prepareStatement(
+                     "SELECT product.category_number, category.category_name, product.product_name, product.characteristics " +
+                             "FROM product " +
+                             "INNER JOIN category " +
+                             "ON category.category_number = product.category_number " +
+                             "WHERE id_product = ?")) {
 
-            ResultSet prod_info = statement.executeQuery(
-                    "SELECT product.category_number, " +
-                            "category.category_name, product.product_name, " +
-                            "product.characteristics " +
-                            "FROM product " +
-                            "INNER JOIN category " +
-                            "ON category.category_number = product.category_number " +
-                            "WHERE id_product = '" + prod_id + "'");
+            statement.setString(1, id);
+            ResultSet prod_info = statement.executeQuery();
 
             if (prod_info.next()) {
                 productNameField.setText(prod_info.getString("product_name"));
                 productCharacteristicsField.setText(prod_info.getString("characteristics"));
                 categoryNamesBox.setValue(prod_info.getString("category_name"));
             }
-
-            statement.close();
-            connectDB.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
