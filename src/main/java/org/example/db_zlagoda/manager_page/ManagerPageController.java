@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.example.db_zlagoda.customers_list.CustomersListController;
 import org.example.db_zlagoda.login_page.LoginPage;
 
 import java.io.IOException;
@@ -28,6 +29,8 @@ public class ManagerPageController {
     @FXML
     private Button clientsButton;
     public void clientsButtonOnAction(ActionEvent event){
+        CustomersListController controller = new CustomersListController();
+        controller.setRole("Менеджер");
         loadView("/org/example/db_zlagoda/customers_list/customers-list-view.fxml");
         handleButtonClicked(clientsButton);
     }

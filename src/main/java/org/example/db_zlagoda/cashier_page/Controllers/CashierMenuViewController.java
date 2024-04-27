@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 import org.example.db_zlagoda.DatabaseConnection;
 import org.example.db_zlagoda.cashier_page.Models.SessionData;
 import org.example.db_zlagoda.cashier_page.Models.UserData;
+import org.example.db_zlagoda.customers_list.CustomersListController;
 import org.example.db_zlagoda.db_data.DatabaseManager;
 import org.example.db_zlagoda.login_page.LoginPage;
 import org.example.db_zlagoda.manager_page.ManagerPageView;
@@ -286,6 +287,8 @@ public class CashierMenuViewController {
         openMenu(searchClientsMenu, clientsButton);
         try {
             FXMLLoader loader = new FXMLLoader(ManagerPageView.class.getResource("/org/example/db_zlagoda/customers_list/customers-list-view.fxml"));
+            CustomersListController controller = new CustomersListController();
+            controller.setRole("Касир");
             AnchorPane view = loader.load();
             searchClientsMenu.getChildren().add(view);
         } catch (IOException e) {

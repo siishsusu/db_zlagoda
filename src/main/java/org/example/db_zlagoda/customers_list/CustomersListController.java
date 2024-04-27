@@ -101,7 +101,9 @@ public class CustomersListController implements Initializable {
                 deleteButton.setDisable(true);
             } else {
                 updateButton.setDisable(false);
-                deleteButton.setDisable(false);
+                if (USER_ROLE.equals("Менеджер")){
+                    deleteButton.setDisable(false);
+                }
 
                 Object[] selectedProduct = customersTable.getSelectionModel().getSelectedItem();
                 searchPercentField.setText(selectedProduct[4].toString());
@@ -109,6 +111,15 @@ public class CustomersListController implements Initializable {
         });
 
         textFieldList = Arrays.asList(surnameField, nameField, patronymicField, phoneField, cityField, streetField, zipCodeField, percentField);
+    }
+
+    private static String USER_ROLE = "";
+    public void setRole(String role){
+        this.USER_ROLE = role;
+    }
+
+    public String getRole() {
+        return USER_ROLE;
     }
 
     private void loadCustomersData(boolean allData) {

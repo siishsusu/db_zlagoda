@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import org.example.db_zlagoda.DatabaseConnection;
+import org.example.db_zlagoda.product_page.category.CategoryPageController;
 
 import java.io.IOException;
 import java.net.URL;
